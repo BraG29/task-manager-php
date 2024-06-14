@@ -18,17 +18,17 @@ class User
     #[ORM\Column(type: 'string')]
     private string $name;
 
-
     #[ORM\Column(name: "last_name", type: 'string')]
     private string $lastName;
-
 
     #[ORM\Column(type: 'string')]
     private string $email;
 
-
     #[ORM\Column(type: 'string')]
     private string $password;
+
+    #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
+    private array $links;
 
     /**
      * @param int|null $id
@@ -36,14 +36,21 @@ class User
      * @param string $lastName
      * @param string $email
      * @param string $password
+     * @param array $links
      */
-    public function __construct(?int $id, string $name, string $lastName, string $email, string $password)
+    public function __construct(int|null $id,
+                                string   $name,
+                                string   $lastName,
+                                string   $email,
+                                string   $password,
+                                array    $links)
     {
         $this->id = $id;
         $this->name = $name;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->password = $password;
+        $this->links = $links;
     }
 
     public function getId(): ?int
@@ -94,6 +101,16 @@ class User
     public function setPassword(string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getLinks(): array
+    {
+        return $this->links;
+    }
+
+    public function setLinks(array $links): void
+    {
+        $this->links = $links;
     }
 
 }
