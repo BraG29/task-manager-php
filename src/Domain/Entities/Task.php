@@ -16,8 +16,13 @@ class Task extends Creatable
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $limitDate;
 
-    #the enum with the states of the task, which are represented by a single
-    #character in the string, see State.php
+    /**
+     * <p>
+     *  The enum with the states of the task, which are represented by a single
+     * character in the string, see State.php
+     * </p>
+     */
+
     #[ORM\Column(enumType: State::class)]
     private State $taskState;
 
