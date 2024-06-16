@@ -2,6 +2,8 @@
 
 namespace App\Domain\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -19,23 +21,21 @@ abstract class Creatable
     #[ORM\Column(type: 'string')]
     protected string $description;
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'creatable')]
-    protected array $links;
+    protected Collection $links;
 
     /**
      * @param int $id
      * @param string $title
      * @param string $description
-     * @param array $links
      */
     public function __construct(int    $id,
                                 string $title,
-                                string $description,
-                                array  $links)
+                                string $description)
     {
         $this->id = $id;
         $this->title = $title;
         $this->description = $description;
-        $this->links = $links;
+        $this->links = new ArrayCollection();
     }
 
     public function getId(): int
@@ -68,12 +68,12 @@ abstract class Creatable
         $this->description = $description;
     }
 
-    public function getLinks(): array
+    public function getLinks(): Collection
     {
         return $this->links;
     }
 
-    public function setLinks(array $links): void
+    public function setLinks(Collection $links): void
     {
         $this->links = $links;
     }
