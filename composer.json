@@ -8,7 +8,8 @@
     "slim/psr7": "^1.5",
     "slim/slim": "^4.10",
     "symfony/cache": "^6.4",
-    "phpmailer/phpmailer": "^6.9"
+    "phpmailer/phpmailer": "^6.9",
+    "firebase/php-jwt": "^6.10"
   },
   "autoload": {
     "psr-4": {
@@ -17,7 +18,7 @@
   },
   "scripts": {
     "generate": "php bin/schema-generator.php orm:schema-tool:drop --force && php bin/schema-generator.php orm:schema-tool:create",
-    "start": "php -S localhost:8080 -t public",
+    "start": "php -S 0.0.0.0:8080 -t public",
     "test": "phpunit"
   }
 }

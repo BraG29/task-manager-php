@@ -8,6 +8,10 @@ use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\UserController;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 class UserControllerImpl implements UserController
 {
@@ -48,32 +52,6 @@ class UserControllerImpl implements UserController
         // TODO: Implement getUsersByProject() method.
     }
 
-    public function registerUser(UserDTO $userDTO): void
-    {
-
-        //nuevos atributos
-        //Token verificacion.
-        //estado verificado.
-        $token = bin2hex(random_bytes(8));
-        $verified = false;
-
-        $user = new User(null, $userDTO->getName(),
-                            $userDTO->getLastName(),
-                            $userDTO->getEmail(),
-                            $userDTO->getPassword(),
-        (array)null);
-
-        //TODO llamar oper del repo.
-        $receiver = $userDTO->getEmail();
-        $subject = "Verificación de correo";
-        //posible link http://localhost:8080/verifiyEmail?token=
-        $verificationLink = "https://comopijaverificar.com/verificar.php?token=" . $token;
-        $message = "Haz clic en el siguiente enlace para verificar tu correo electrónico: " . $verificationLink;
-
-        //mensaje llama endpoint de  verificar.
-        //TODO oper verificar mail.
-    }
-
     public function signIn(string $email, string $password)
     {
         //si no esta verificado no inicia sesion.
@@ -89,5 +67,41 @@ class UserControllerImpl implements UserController
     public function linkUserToProject(int $userId, int $projectId)
     {
         // TODO: Implement linkUserToProject() method.
+    }
+
+    public function registerUser(UserDTO $userDTO): int
+    {
+        //nuevos atributos
+        //Token verificacion.
+        //estado verificado.
+        $token = bin2hex(random_bytes(8));
+        $verified = false;
+
+        $user = new User(
+            $userDTO->getId(),
+            $userDTO->getName(),
+            $userDTO->getLastName(),
+            $userDTO->getEmail(),
+            $userDTO->getPassword(),
+            new ArrayCollection()
+        );
+
+        try {
+            $this->userRepository->save($user);
+
+            $receiver = $userDTO->getEmail();
+            $subject = "Verificación de correo";
+            //posible link http://localhost:8080/verifiyEmail?token=
+            $verificationLink = "https://comopijaverificar.com/verificar.php?token=" . $token;
+            $message = "Haz clic en el siguiente enlace para verificar tu correo electrónico: " . $verificationLink;
+
+            //mensaje llama endpoint de  verificar.
+            //TODO oper verificar mail.
+            return $user->getId();
+
+        } catch (Exception $e) {
+            echo "Error persistiendo: " . $e->getMessage();
+            return 0;
+        }
     }
 }

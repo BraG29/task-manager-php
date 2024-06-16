@@ -23,8 +23,9 @@ interface UserController
     /**
      * Función para registrar un nuevo usuario en el sistema.
      * @param UserDTO $userDTO -> datos del usuario a registrar.
+     * @return int
      */
-    public function registerUser(UserDTO $userDTO);
+    public function registerUser(UserDTO $userDTO): int;
 
     /**
      * Función para que un usuario inicie sesion en el sistema.

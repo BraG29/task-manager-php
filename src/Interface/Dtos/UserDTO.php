@@ -3,6 +3,7 @@
 namespace App\Interface\Dtos;
 
 use App\Domain\Entities\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use JsonSerializable;
 
 class UserDTO implements JsonSerializable
@@ -16,6 +17,7 @@ class UserDTO implements JsonSerializable
     private string $email;
 
     private string $password;
+
 
     /** Crea un DTO a partir la entidad <code>User</code>
      * @param User $user
@@ -77,6 +79,24 @@ class UserDTO implements JsonSerializable
     public function setPassword(string $password): void
     {
         $this->password = $password;
+    }
+
+    /** Parsea JSON a DTO
+     * @param array $data
+     * @return UserDTO
+     */
+    public static function fromArray(array $data) : UserDTO
+    {
+        return new self(
+            new User(
+                $data['id'] ?? null,
+                $data['name'],
+                $data['lastName'],
+                $data['email'],
+                $data['password'],
+                new ArrayCollection()
+            )
+        );
     }
 
     #[\ReturnTypeWillChange]

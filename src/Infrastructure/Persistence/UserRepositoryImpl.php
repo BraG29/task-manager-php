@@ -15,7 +15,7 @@ class UserRepositoryImpl implements UserRepository
     /**
      * @var EntityRepository
      */
-    private $repository;
+    private EntityRepository $repository;
 
     /**
      * @param EntityManager $entityManager
@@ -35,5 +35,11 @@ class UserRepositoryImpl implements UserRepository
     public function findAll(): array
     {
         return $this->repository->findAll();
+    }
+
+    public function save(User $user): void
+    {
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 }

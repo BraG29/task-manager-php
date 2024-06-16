@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -21,14 +23,14 @@ class User
     #[ORM\Column(name: "last_name", type: 'string')]
     private string $lastName;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', unique: true)]
     private string $email;
 
     #[ORM\Column(type: 'string')]
     private string $password;
 
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
-    private array $links;
+    private Collection $links;
 
     /**
      * @param int|null $id
@@ -36,14 +38,14 @@ class User
      * @param string $lastName
      * @param string $email
      * @param string $password
-     * @param array $links
+     * @param Collection $links
      */
-    public function __construct(int|null $id,
-                                string   $name,
-                                string   $lastName,
-                                string   $email,
-                                string   $password,
-                                array    $links)
+    public function __construct(int|null   $id,
+                                string     $name,
+                                string     $lastName,
+                                string     $email,
+                                string     $password,
+                                Collection $links)
     {
         $this->id = $id;
         $this->name = $name;
@@ -103,12 +105,12 @@ class User
         $this->password = $password;
     }
 
-    public function getLinks(): array
+    public function getLinks(): Collection
     {
         return $this->links;
     }
 
-    public function setLinks(array $links): void
+    public function setLinks(Collection $links): void
     {
         $this->links = $links;
     }
