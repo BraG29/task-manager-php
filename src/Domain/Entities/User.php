@@ -32,6 +32,11 @@ class User
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
     private Collection $links;
 
+
+    #[ORM\OneToMany(targetEntity: Token::class, mappedBy: 'user')]
+    private Token $token;
+
+
     /**
      * @param int|null $id
      * @param string $name
