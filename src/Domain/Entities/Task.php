@@ -69,4 +69,7 @@ class Task extends Creatable
         $this->taskState = $taskState;
     }
 
+    public function getProject(): Project{
+        return $this->project;
+    }
 }

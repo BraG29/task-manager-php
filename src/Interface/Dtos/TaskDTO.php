@@ -3,16 +3,19 @@
 namespace App\Interface\Dtos;
 
 use App\Domain\Entities\Enums\State;
-use App\Domain\Entities\Project;
 use DateTimeImmutable;
 
 class TaskDTO extends CreatableDTO{
     private DateTimeImmutable $limitDate;
     private State $taskState;
-    private Project $project;
+    private int $project;
 
     /**
-     * @param Project $project
+     * @param int $id
+     * @param string $title
+     * @param string $description
+     * @param array $links
+     * @param int $project
      * @param State $taskState
      * @param DateTimeImmutable $limitDate
      */
@@ -21,7 +24,7 @@ class TaskDTO extends CreatableDTO{
                                                 string $title,
                                                 string $description,
                                                 array $links,
-                                                Project $project,
+                                                int $project,
                                                 State $taskState,
                                                 DateTimeImmutable $limitDate){
 
@@ -64,17 +67,17 @@ class TaskDTO extends CreatableDTO{
     }
 
     /**
-     * @return Project
+     * @return int
      */
-    public function getProject(): Project
+    public function getProject(): int
     {
         return $this->project;
     }
 
     /**
-     * @param Project $project
+     * @param int $project
      */
-    public function setProject(Project $project): void
+    public function setProject(int $project): void
     {
         $this->project = $project;
     }
