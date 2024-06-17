@@ -142,8 +142,9 @@ class UserControllerImpl implements UserController
             $subject = "Verificación de correo";
             $verificationLink = "http://localhost:8080/verifiyEmail?token=" . $token->getToken();
             $message = "Haz clic en el siguiente enlace para verificar tu correo electrónico: " . $verificationLink;
+            $sendMail = require __DIR__ . '/../../../public/sendEmail.php';
 
-            sendMail($receiver, $subject, $message);
+            $sendMail($receiver, $subject, $message);
             return $user->getId();
 
         } catch (Exception $e) {

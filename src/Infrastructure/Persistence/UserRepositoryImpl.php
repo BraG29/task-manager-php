@@ -41,6 +41,9 @@ class UserRepositoryImpl implements UserRepository
 
     public function save(User $user): void
     {
+        if($user->getToken() != null){
+            $this->entityManager->persist($user->getToken());
+        }
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

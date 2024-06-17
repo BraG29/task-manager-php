@@ -18,8 +18,8 @@ class Token{
     #[ORM\Column(type: 'string')]
     private string $token;
 
-    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'token')]
-    private User $user;
+//    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'token')]
+//    private User $user;
 
     /**
      * @param int|null $id
@@ -50,18 +50,4 @@ class Token{
     {
         $this->token = $token;
     }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
-    public function setUser(User $user): void
-    {
-        $this->user = $user;
-    }
-
-
-
-
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,15 +28,13 @@ class User
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    #[ORM\OneToOne(mappedBy: 'user')]
-    /**
-      @var Collection<int, Link>
-     */
+
+    #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
     private Collection $links;
 
 
-    #[ORM\OneToOne(targetEntity: Token::class, mappedBy: 'user')]
-    private ?Token $token;
+    #[ORM\OneToOne(targetEntity: Token::class)]
+    private Token $token;
 
 
     /**
