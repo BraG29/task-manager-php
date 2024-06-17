@@ -29,9 +29,11 @@ class TaskRepositoryImpl implements TaskRepository{
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function createTask(Task $task){
+    public function addTask(Task $task): ?int
+    {
         $this->entityManager->persist($task);
         $this->entityManager->flush();
+        return $task->getId();
     }
 
     public function updateTask(Task $task)
