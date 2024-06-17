@@ -5,6 +5,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -14,18 +16,17 @@ class Project extends Creatable {
     private bool $available;
 
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project')]
-    private array $tasks;
+    private Collection $tasks;
 
     public function __construct(int    $id,
                                 string $name,
                                 string $description,
                                 array  $links,
-                                bool   $state,
-                                array  $tasks)
+                                bool   $state)
     {
         parent::__construct($id, $name, $description, $links);
         $this->available = $state;
-        $this->tasks = $tasks;
+        $this->tasks = new ArrayCollection();
     }
 
     public function addLink(Link $link) : void
@@ -47,12 +48,12 @@ class Project extends Creatable {
         $this->available = $available;
     }
 
-    public function getTasks(): array
+    public function getTasks(): Collection
     {
         return $this->tasks;
     }
 
-    public function setTasks(array $tasks): void
+    public function setTasks(Collection $tasks): void
     {
         $this->tasks = $tasks;
     }
