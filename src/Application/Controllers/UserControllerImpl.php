@@ -15,7 +15,6 @@ use Exception;
 
 class UserControllerImpl implements UserController
 {
-
     private UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository){

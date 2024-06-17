@@ -1,10 +1,11 @@
 <?php
 
-
+namespace App\Application\Controllers;
 
 use App\Interface\ProjectController;
 use App\Domain\Repositories\ProjectRepository;
 use App\Interface\Dtos\ProjectDTO;
+
 class ProjectControllerImpl implements ProjectController {
 
     private ProjectRepository $projectRepository;

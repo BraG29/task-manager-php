@@ -22,7 +22,7 @@ return function (App $app, UserController $userController) {
     });
     
 //    Example: http://localhost:8080/users/1
-    $app->get('/users/{id}', function ($request, $response, $args) use ($userController) {
+    $app->get('/users/{id}', function (Request $request, Response $response, $args) use ($userController) {
         $userId = $args['id'];
         $user = $userController->getUser($userId);
         $response->getBody()->write(json_encode($user));
