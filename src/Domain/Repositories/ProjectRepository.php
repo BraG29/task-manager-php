@@ -2,7 +2,7 @@
 
 namespace App\Domain\Repositories;
 
-use App\Domain\Entities\Project;
+//use App\Domain\Entities\Project;
 
 interface ProjectRepository
 {

@@ -29,12 +29,15 @@ class User
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
+    #[ORM\OneToOne(mappedBy: 'user')]
+    /**
+      @var Collection<int, Link>
+     */
     private Collection $links;
 
 
-    #[ORM\OneToMany(targetEntity: Token::class, mappedBy: 'user')]
-    private Token $token;
+    #[ORM\OneToOne(targetEntity: Token::class, mappedBy: 'user')]
+    private ?Token $token;
 
 
     /**
@@ -45,7 +48,7 @@ class User
      * @param string $password
      * @param Collection $links
      */
-    public function __construct(int|null   $id,
+    public function __construct(?int   $id,
                                 string     $name,
                                 string     $lastName,
                                 string     $email,
@@ -120,4 +123,13 @@ class User
         $this->links = $links;
     }
 
+    public function getToken(): Token
+    {
+        return $this->token;
+    }
+
+    public function setToken(Token $token): void
+    {
+        $this->token = $token;
+    }
 }

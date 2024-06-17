@@ -4,6 +4,7 @@ namespace App\Interface;
 
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\Dtos\UserDTO;
+use App\Interface\Dtos\ProjectDTO;
 
 interface UserController
 {
@@ -43,15 +44,17 @@ interface UserController
      * @param RoleType $role -> rol que se le quiere dar al usuario.
      * @return mixed
      */
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, RoleType $role);
+    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role);
 
     /**
      * Función para vincular un usuario a un proyecto, cuando este acepta una  invitacion.
-     * @param int $userId -> id del usuario a vincular.
+     * @param int $userOwnerId -> id del usuario dueño del proyecto.
+     * @param int $userInvitedId -> id del usuario a invitar.
      * @param int $projectId -> id del proyecto a vincular.
+     * @param RoleType $role
      * @return mixed
      */
-    public function linkUserToProject(int $userId, int $projectId);
+    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role);
 
 
     /*

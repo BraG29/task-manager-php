@@ -87,6 +87,7 @@ class UserDTO implements JsonSerializable
      */
     public static function fromArray(array $data) : UserDTO
     {
+
         return new self(
             new User(
                 $data['id'] ?? null,

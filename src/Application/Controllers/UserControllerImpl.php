@@ -4,14 +4,18 @@ namespace App\Application\Controllers;
 
 
 use App\Domain\Entities\Enums\RoleType;
+use App\Domain\Entities\Link;
+use App\Domain\Entities\Token;
 use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\Dtos\UserDTO;
+use App\Interface\Dtos\ProjectDTO;
 use App\Interface\UserController;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
+
 
 class UserControllerImpl implements UserController
 {
@@ -53,49 +57,93 @@ class UserControllerImpl implements UserController
 
     public function signIn(string $email, string $password)
     {
-        //si no esta verificado no inicia sesion.
-        //busco user en la bd y compruebo estado de verifiacion.
-        // TODO: Implement signIn() method.
+        try {
+            $user = $this->userRepository->findByEmail($email);
+
+            if($user->getToken() != null){
+                throw new Exception("Por favor validate antes de iniciar sesión");
+            }
+
+            if($user->getEmail() == $email && $user->getPassword() == $password){
+                    //TODO redicerct al dashboard.
+                echo "Iniciaste sesion";
+                //header("");
+            }else{
+                throw new Exception("Credenciales invalidas, contraseña y/o correo invalidos");
+            }
+
+        }catch (Exception $e){
+            throw $e;
+        }
+
     }
 
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, RoleType $role)
+    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role)
     {
-        // TODO: Implement inviteUserToProject() method.
+
+        $r = $receiver->getEmail();
+        $subject = "Te han invitado a un proyecto!";
+        $aceptationLink = "http://localhost:8080/invitationAccepted";
+        $message = $sender->getName() . " te ha invitado a unirte a su proyecto: " . $project->getName(). "
+        Presiona el link para aceptar: " . $aceptationLink;
+
+        // TODO: ver como enviar al endpoint de linkear usuario desde el mensaje, con los parametros.
+        sendMail($r, $subject, $message);
+
     }
 
-    public function linkUserToProject(int $userId, int $projectId)
+    public function linkUserToProject(int $userOwnerId, int $userId, int $projectId, RoleType $role)
     {
-        // TODO: Implement linkUserToProject() method.
+        try{
+            $userInvited = $this->userRepository->findById($userId);
+
+            $projectOwner = $this->userRepository->findById($userOwnerId);
+
+            foreach ($projectOwner->getLinks() as $link){
+                //si usuario tiene un vinculo con el projecto y es ADMIN del mismo.
+                if($link->getCreatable()->getId() == $projectId ||  $link->getRole() == RoleType::ADMIN){
+                    $project = $link->getCreatable(); //obtengo proyecto.
+
+                    $newLink = new Link(null, new \DateTimeImmutable(), $role, $project, $userInvited);
+
+                    $userInvited->getLinks()->add($newLink);
+
+                    $this->userRepository->save($userInvited);
+                }
+            }
+
+        }catch (Exception $e){
+            throw $e;
+        }
+
     }
 
     public function registerUser(UserDTO $userDTO): int
     {
-        //nuevos atributos
-        //Token verificacion.
-        //estado verificado.
-        $token = bin2hex(random_bytes(8));
-        $verified = false;
 
+        $tokenGenerator = bin2hex(random_bytes(8));
+        $token = new Token(null, $tokenGenerator);
+
+        //TODO hashear contraseña
         $user = new User(
             $userDTO->getId(),
             $userDTO->getName(),
             $userDTO->getLastName(),
             $userDTO->getEmail(),
             $userDTO->getPassword(),
-            new ArrayCollection()
+            new ArrayCollection(),
         );
+        $user->setToken($token);
 
         try {
             $this->userRepository->save($user);
 
             $receiver = $userDTO->getEmail();
             $subject = "Verificación de correo";
-            //posible link http://localhost:8080/verifiyEmail?token=
-            $verificationLink = "https://comopijaverificar.com/verificar.php?token=" . $token;
+            $verificationLink = "http://localhost:8080/verifiyEmail?token=" . $token->getToken();
             $message = "Haz clic en el siguiente enlace para verificar tu correo electrónico: " . $verificationLink;
 
-            //mensaje llama endpoint de  verificar.
-            //TODO oper verificar mail.
+            sendMail($receiver, $subject, $message);
             return $user->getId();
 
         } catch (Exception $e) {
@@ -103,4 +151,7 @@ class UserControllerImpl implements UserController
             return 0;
         }
     }
+
+    //TODO oper verificar email.
+
 }
