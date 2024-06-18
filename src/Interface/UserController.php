@@ -5,6 +5,7 @@ namespace App\Interface;
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\Dtos\ProjectDTO;
+use Exception;
 
 interface UserController
 {
@@ -32,9 +33,10 @@ interface UserController
      * Función para que un usuario inicie sesion en el sistema.
      * @param String $email -> email del usuario.
      * @param String $password -> contraseña del usuario
-     * @return mixed -> retorna una respues afirmativa en caso de encontrar los datos enviados.
+     * @return UserDTO|null -> retorna una respues afirmativa en caso de encontrar los datos enviados.
+     * @throws Exception
      */
-    public function signIn(String $email, String $password);
+    public function signIn(String $email, String $password): ?UserDTO;
 
 
     /**

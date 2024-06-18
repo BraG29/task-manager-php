@@ -55,27 +55,22 @@ class UserControllerImpl implements UserController
         // TODO: Implement getUsersByProject() method.
     }
 
-    public function signIn(string $email, string $password)
+    public function signIn(string $email, string $password): ?UserDTO
     {
-        try {
-            $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findByEmail($email);
 
-            if($user->getToken() != null){
-                throw new Exception("Por favor validate antes de iniciar sesión");
-            }
+//            if($user->getToken() != null){
+//                throw new Exception("Por favor validate antes de iniciar sesión");
+//            }
 
-            if($user->getEmail() == $email && $user->getPassword() == $password){
-                    //TODO redicerct al dashboard.
-                echo "Iniciaste sesion";
-                //header("");
-            }else{
-                throw new Exception("Credenciales invalidas, contraseña y/o correo invalidos");
-            }
+        if($user
+            && substr_compare($user->getEmail(), $email, 0) == 0
+            && substr_compare($user->getPassword(), $password, 0) == 0){
 
-        }catch (Exception $e){
-            throw $e;
+            return new UserDTO($user);
         }
 
+        return null;
     }
 
     public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role)
