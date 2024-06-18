@@ -41,9 +41,6 @@ class UserRepositoryImpl implements UserRepository
 
     public function save(User $user): void
     {
-        if($user->getToken() != null){
-            $this->entityManager->persist($user->getToken());
-        }
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
@@ -52,5 +49,6 @@ class UserRepositoryImpl implements UserRepository
     {
         return $this->repository->findOneBy(['email' => $email]);
     }
+
 
 }

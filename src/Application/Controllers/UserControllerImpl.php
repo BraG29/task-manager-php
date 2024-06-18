@@ -5,7 +5,6 @@ namespace App\Application\Controllers;
 
 use App\Domain\Entities\Enums\RoleType;
 use App\Domain\Entities\Link;
-use App\Domain\Entities\Token;
 use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\Dtos\UserDTO;
@@ -56,12 +55,9 @@ class UserControllerImpl implements UserController
     }
 
     public function signIn(string $email, string $password): ?UserDTO
+
     {
         $user = $this->userRepository->findByEmail($email);
-
-//            if($user->getToken() != null){
-//                throw new Exception("Por favor validate antes de iniciar sesión");
-//            }
 
         if($user
             && substr_compare($user->getEmail(), $email, 0) == 0
@@ -73,7 +69,7 @@ class UserControllerImpl implements UserController
         return null;
     }
 
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role)
+    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role): void
     {
 
         $r = $receiver->getEmail();
@@ -83,15 +79,14 @@ class UserControllerImpl implements UserController
         Presiona el link para aceptar: " . $aceptationLink;
 
         // TODO: ver como enviar al endpoint de linkear usuario desde el mensaje, con los parametros.
-        sendMail($r, $subject, $message);
+        //sendMail($r, $subject, $message);
 
     }
 
-    public function linkUserToProject(int $userOwnerId, int $userId, int $projectId, RoleType $role)
+    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void
     {
         try{
-            $userInvited = $this->userRepository->findById($userId);
-
+            $userInvited = $this->userRepository->findById($userInvitedId);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
             foreach ($projectOwner->getLinks() as $link){
@@ -116,9 +111,6 @@ class UserControllerImpl implements UserController
     public function registerUser(UserDTO $userDTO): int
     {
 
-        $tokenGenerator = bin2hex(random_bytes(8));
-        $token = new Token(null, $tokenGenerator);
-
         //TODO hashear contraseña
         $user = new User(
             $userDTO->getId(),
@@ -127,18 +119,35 @@ class UserControllerImpl implements UserController
             $userDTO->getEmail(),
             $userDTO->getPassword(),
             new ArrayCollection(),
+            false
         );
-        $user->setToken($token);
 
         try {
             $this->userRepository->save($user);
 
             $receiver = $userDTO->getEmail();
-            $subject = "Verificación de correo";
-            $verificationLink = "http://localhost:8080/verifiyEmail?token=" . $token->getToken();
-            $message = "Haz clic en el siguiente enlace para verificar tu correo electrónico: " . $verificationLink;
-            $sendMail = require __DIR__ . '/../../../public/sendEmail.php';
+            $name = $userDTO->getName();
+            $subject = "Verificacion de correo";
+            $userId = $user->getId();
 
+            $verificationLink = "http://192.168.1.15:8080/verifyEmail?userId=".$userId;
+
+            $message = "
+                <html>
+                <body>
+                    <p>Hola! $name bienvenido a nuestra plataforma.</p>
+                    <br>
+                    <p>Para poder iniciar sesion primero debes verificar tu correo. <br>
+                    Haz clic en el siguiente boton para verificar tu correo electronico:</p>
+                    <br>
+                    <a href='$verificationLink'>
+                        <button style='padding: 10px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Verificar correo</button>
+                    </a>
+                </body>
+                </html>
+            ";
+
+            $sendMail = require __DIR__ . '/../../../app/sendEmail.php';
             $sendMail($receiver, $subject, $message);
             return $user->getId();
 
@@ -148,6 +157,23 @@ class UserControllerImpl implements UserController
         }
     }
 
-    //TODO oper verificar email.
+    public function verifyEmail(int $userId): bool
+    {
+        try{
 
+            $user = $this->userRepository->findById($userId);
+            var_dump($user->isVerified());
+            if(!$user->isVerified()){
+                $user->setVerified(true);
+                $this->userRepository->save($user);
+                return true;
+            }else{
+                echo "este correo ya esta verificado.";
+            }
+        } catch (Exception $e){
+            throw $e;
+        }
+
+        return false;
+    }
 }

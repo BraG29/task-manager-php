@@ -23,13 +23,18 @@ return function (App $app, UserController $userController) {
         $user = $userController->signIn($email, $password);
 
         if($user){
-            $generateJwt = require __DIR__ . '/generateJwt.php';
-            $response->getBody()->write(json_encode(['token' => $generateJwt($user)]));
+            if(!$user->isVerified()){
+                $response->getBody()->write(json_encode(['error' => 'Para poder iniciar sesion debes verificarte.']));
 
-            return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+            }else{
+                $generateJwt = require __DIR__ . '/generateJwt.php';
+                $response->getBody()->write(json_encode(['token' => $generateJwt($user)]));
+
+                return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+            }
+        }else{
+            $response->getBody()->write(json_encode(['error' => 'Credenciales incorrectas']));
         }
-
-        $response->getBody()->write(json_encode(['error' => 'Credenciales incorrectas']));
         return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
     });
 
@@ -60,6 +65,23 @@ return function (App $app, UserController $userController) {
         }else{
             $response->getBody()->write("Usuario creado con id: " . $userId);
             return $response;
+        }
+    });
+
+    $app->get('/verifyEmail', function (Request $request, Response $response, $args) use ($userController) {
+
+        //parametros en el link.
+        $params = $request->getQueryParams();
+        $id = $params['userId'];
+
+        $verification = $userController->verifyEmail($id);
+
+        if($verification){
+            $response->getBody()->write("Correo verificado con exito.");
+            return $response;
+        }else{
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+
         }
     });
 };

@@ -36,6 +36,7 @@ interface UserController
      * @return UserDTO|null -> retorna una respues afirmativa en caso de encontrar los datos enviados.
      * @throws Exception
      */
+
     public function signIn(String $email, String $password): ?UserDTO;
 
 
@@ -46,7 +47,7 @@ interface UserController
      * @param RoleType $role -> rol que se le quiere dar al usuario.
      * @return mixed
      */
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role);
+    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role): void;
 
     /**
      * Función para vincular un usuario a un proyecto, cuando este acepta una  invitacion.
@@ -56,8 +57,9 @@ interface UserController
      * @param RoleType $role
      * @return mixed
      */
-    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role);
+    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void;
 
+    public function verifyEmail(int $userId): bool;
 
     /*
      * registrar(user: User)

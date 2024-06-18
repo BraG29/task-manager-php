@@ -34,7 +34,6 @@ return function (String $emailReceiver, String $subject, String $body): void
         $mail->Body = $body;
 
         $mail->send();
-        echo 'Correo enviado exitosamente';
     } catch (Exception $e) {
         echo "Error al enviar el correo: {$mail->ErrorInfo}";
     }

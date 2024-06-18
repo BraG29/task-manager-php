@@ -28,14 +28,11 @@ class User
     #[ORM\Column(type: 'string')]
     private string $password;
 
-
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
     private Collection $links;
 
-
-    #[ORM\OneToOne(targetEntity: Token::class)]
-    private Token $token;
-
+    #[ORM\Column(type: 'boolean')]
+    public bool $verified;
 
     /**
      * @param int|null $id
@@ -50,7 +47,8 @@ class User
                                 string     $lastName,
                                 string     $email,
                                 string     $password,
-                                Collection $links)
+                                Collection $links,
+                                bool $verified)
     {
         $this->id = $id;
         $this->name = $name;
@@ -58,6 +56,7 @@ class User
         $this->email = $email;
         $this->password = $password;
         $this->links = $links;
+        $this->verified = $verified;
     }
 
     public function getId(): ?int
@@ -120,13 +119,16 @@ class User
         $this->links = $links;
     }
 
-    public function getToken(): Token
+    public function isVerified(): bool
     {
-        return $this->token;
+        return $this->verified;
     }
 
-    public function setToken(Token $token): void
+    public function setVerified(bool $verified): void
     {
-        $this->token = $token;
+        $this->verified = $verified;
     }
+
+
+
 }
