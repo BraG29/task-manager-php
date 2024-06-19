@@ -15,7 +15,7 @@ abstract class Creatable
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
-    protected int $id;
+    protected ?int $id;
     #[ORM\Column(type: 'string')]
     protected string $title;
     #[ORM\Column(type: 'string')]
@@ -28,7 +28,7 @@ abstract class Creatable
      * @param string $title
      * @param string $description
      */
-    public function __construct(int    $id,
+    public function __construct(int | null   $id,
                                 string $title,
                                 string $description)
     {
@@ -43,8 +43,7 @@ abstract class Creatable
         return $this->id;
     }
 
-    public function setId(int $id): void
-    {
+    public function setId(int $id): void{
         $this->id = $id;
     }
 

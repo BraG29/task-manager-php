@@ -29,24 +29,25 @@ class Task extends Creatable
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     private Project $project;
 
+    //for shody;
     /**
      * @param int|null $id
      * @param string $title
      * @param DateTimeImmutable $limitDate
-     * @param array $links
      * @param string $description
      * @param State $taskState
      */
     public function __construct(int|null          $id,
                                 string            $title,
                                 DateTimeImmutable $limitDate,
-                                array             $links,
                                 string            $description,
-                                State             $taskState)
+                                State            $taskState,
+                                Project          $project)
     {
-        parent::__construct($id, $title, $description, $links);
+        parent::__construct($id, $title, $description);
         $this->limitDate = $limitDate;
         $this->taskState = $taskState;
+        $this->project = $project;
     }
 
     public function getLimitDate(): DateTimeImmutable

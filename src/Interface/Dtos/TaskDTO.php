@@ -3,7 +3,10 @@
 namespace App\Interface\Dtos;
 
 use App\Domain\Entities\Enums\State;
+use App\Domain\Entities\Task;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use JsonSerializable;
 
 class TaskDTO extends CreatableDTO{
     private DateTimeImmutable $limitDate;
@@ -20,10 +23,10 @@ class TaskDTO extends CreatableDTO{
      * @param DateTimeImmutable $limitDate
      */
     public function __construct(
-                                                int $id,
+                                                int | null $id,
                                                 string $title,
                                                 string $description,
-                                                array $links,
+                                                array | null $links,
                                                 int $project,
                                                 State $taskState,
                                                 DateTimeImmutable $limitDate){
@@ -81,6 +84,68 @@ class TaskDTO extends CreatableDTO{
     {
         $this->project = $project;
     }
+
+#[\ReturnTypeWillChange]
+public function jsonSerialize(): array{
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'links' => $this->links,
+            'project' => $this->project,
+            'limitDate' => $this->limitDate,
+            'taskState' => $this->taskState
+
+        ];
+}
+
+//ublic function __construct(
+//     int $id,
+//     string $title,
+//     string $description,
+//     array $links,
+//     int $project,
+//     State $taskState,
+//     DateTimeImmutable $limitDate ): TaskDTO
+
+/*
+ *                 $data['id']?? null,
+                $data['title'],
+                $data['description'],
+                new ArrayCollection($data['links']),
+                $data['project'],
+                $data['taskState'],
+                $data['limitDate'],
+
+            new Task(
+                $data['id'] ?? null,
+                $data['title'] ,
+                $DataTime ,
+                $data['description'] ,
+                $taskState,
+                $data['project']
+            )
+        );
+ */
+
+    /**
+     * @throws \Exception
+     */
+    public static function fromArray(array $data): TaskDTO{
+
+    $DataTime = new DateTimeImmutable($data['limitDate']);
+    $taskState = State::from($data['taskState']);
+
+        return new self(
+            $data['id'] ?? null,
+            $data['title'] ,
+            $data['description'] ,
+            $data['links'] ?? null,
+                $data['project'],
+            $taskState,
+            $DataTime);
+    }
+
 
 
 }

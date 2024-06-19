@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Interface\Dtos;
+use JsonSerializable;
 
 abstract class CreatableDTO{
-    protected int $id;
+    protected ?int $id;
     protected string $title;
     protected string $description;
-    protected array $links;
+    protected ?array $links;
 
     /**
      * @param int $id
@@ -14,7 +15,10 @@ abstract class CreatableDTO{
      * @param string $description
      * @param array $links
      */
-    public function __construct(int $id, string $title, string $description, array $links)
+    public function __construct(int | null $id,
+                                string $title,
+                                string $description,
+                                array | null $links)
     {
         $this->id = $id;
         $this->title = $title;

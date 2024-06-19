@@ -36,9 +36,15 @@ class TaskRepositoryImpl implements TaskRepository{
         return $task->getId();
     }
 
-    public function updateTask(Task $task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function updateTask(Task $task): ?int
     {
-        // TODO: Implement updateTask() method.
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
+        return $task->getId();
     }
 
     public function deleteTask(Task $task)
@@ -58,8 +64,7 @@ class TaskRepositoryImpl implements TaskRepository{
     }
 
 
-    public function findAll(): array
-    {
+    public function findAll(): array{
         return $this->repository->findAll();
     }
 
