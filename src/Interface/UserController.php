@@ -4,6 +4,8 @@ namespace App\Interface;
 
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\Dtos\UserDTO;
+use App\Interface\Dtos\ProjectDTO;
+use Exception;
 
 interface UserController
 {
@@ -31,9 +33,11 @@ interface UserController
      * Función para que un usuario inicie sesion en el sistema.
      * @param String $email -> email del usuario.
      * @param String $password -> contraseña del usuario
-     * @return mixed -> retorna una respues afirmativa en caso de encontrar los datos enviados.
+     * @return UserDTO|null -> retorna una respues afirmativa en caso de encontrar los datos enviados.
+     * @throws Exception
      */
-    public function signIn(String $email, String $password);
+
+    public function signIn(String $email, String $password): ?UserDTO;
 
 
     /**
@@ -43,16 +47,19 @@ interface UserController
      * @param RoleType $role -> rol que se le quiere dar al usuario.
      * @return mixed
      */
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, RoleType $role);
+    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role): void;
 
     /**
      * Función para vincular un usuario a un proyecto, cuando este acepta una  invitacion.
-     * @param int $userId -> id del usuario a vincular.
+     * @param int $userOwnerId -> id del usuario dueño del proyecto.
+     * @param int $userInvitedId -> id del usuario a invitar.
      * @param int $projectId -> id del proyecto a vincular.
+     * @param RoleType $role
      * @return mixed
      */
-    public function linkUserToProject(int $userId, int $projectId);
+    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void;
 
+    public function verifyEmail(int $userId): bool;
 
     /*
      * registrar(user: User)

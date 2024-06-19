@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,10 +31,8 @@ class User
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
     private Collection $links;
 
-
-    #[ORM\OneToMany(targetEntity: Token::class, mappedBy: 'user')]
-    private Token $token;
-
+    #[ORM\Column(type: 'boolean')]
+    public bool $verified;
 
     /**
      * @param int|null $id
@@ -45,12 +42,13 @@ class User
      * @param string $password
      * @param Collection $links
      */
-    public function __construct(int|null   $id,
+    public function __construct(?int   $id,
                                 string     $name,
                                 string     $lastName,
                                 string     $email,
                                 string     $password,
-                                Collection $links)
+                                Collection $links,
+                                bool $verified)
     {
         $this->id = $id;
         $this->name = $name;
@@ -58,6 +56,7 @@ class User
         $this->email = $email;
         $this->password = $password;
         $this->links = $links;
+        $this->verified = $verified;
     }
 
     public function getId(): ?int
@@ -119,5 +118,17 @@ class User
     {
         $this->links = $links;
     }
+
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(bool $verified): void
+    {
+        $this->verified = $verified;
+    }
+
+
 
 }

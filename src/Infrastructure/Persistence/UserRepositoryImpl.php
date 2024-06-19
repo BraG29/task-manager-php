@@ -2,6 +2,8 @@
 
 namespace App\Infrastructure\Persistence;
 
+use App\Domain\Entities\Creatable;
+use App\Domain\Entities\Project;
 use App\Domain\Repositories\UserRepository;
 use App\Domain\Entities\User;
 
@@ -42,4 +44,11 @@ class UserRepositoryImpl implements UserRepository
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
+
+    public function findByEmail(string $email): ?User
+    {
+        return $this->repository->findOneBy(['email' => $email]);
+    }
+
+
 }

@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-function sendMail (String $emailReceiver, String $subject, String $body): void
+return function (String $emailReceiver, String $subject, String $body): void
 {
     $mail = new PHPMailer(true);
 
@@ -34,11 +34,7 @@ function sendMail (String $emailReceiver, String $subject, String $body): void
         $mail->Body = $body;
 
         $mail->send();
-        echo 'Correo enviado exitosamente';
     } catch (Exception $e) {
         echo "Error al enviar el correo: {$mail->ErrorInfo}";
     }
-}
-
-
-
+};

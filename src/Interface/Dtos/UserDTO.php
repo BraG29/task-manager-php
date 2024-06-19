@@ -18,6 +18,7 @@ class UserDTO implements JsonSerializable
 
     private string $password;
 
+    private bool $verified;
 
     /** Crea un DTO a partir la entidad <code>User</code>
      * @param User $user
@@ -29,6 +30,7 @@ class UserDTO implements JsonSerializable
         $this->lastName = $user->getLastName();
         $this->email = $user->getEmail();
         $this->password = $user->getPassword();
+        $this->verified = $user->isVerified();
     }
 
     public function getId(): ?int
@@ -81,12 +83,23 @@ class UserDTO implements JsonSerializable
         $this->password = $password;
     }
 
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(bool $verified): void
+    {
+        $this->verified = $verified;
+    }
+
     /** Parsea JSON a DTO
      * @param array $data
      * @return UserDTO
      */
     public static function fromArray(array $data) : UserDTO
     {
+
         return new self(
             new User(
                 $data['id'] ?? null,
@@ -94,7 +107,8 @@ class UserDTO implements JsonSerializable
                 $data['lastName'],
                 $data['email'],
                 $data['password'],
-                new ArrayCollection()
+                new ArrayCollection(),
+                $data['verified']
             )
         );
     }

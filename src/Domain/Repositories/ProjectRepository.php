@@ -2,7 +2,10 @@
 
 namespace App\Domain\Repositories;
 
+//use App\Domain\Entities\Project;
+
 use App\Domain\Entities\Project;
+use App\Infrastructure\Persistence\ProjectRepositoryImpl;
 
 interface ProjectRepository
 {
@@ -10,7 +13,7 @@ interface ProjectRepository
     public  function createProject();
     public  function editProject();
     public  function deleteProject();
-    public function findById();
+    public function findById(int $id):?Project;
     public function findAll();
 
 }

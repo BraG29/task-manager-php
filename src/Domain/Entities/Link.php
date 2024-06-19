@@ -36,7 +36,7 @@ class Link
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
-    private int $id;
+    private ?int $id;
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $creationDate;
     #[ORM\Column(enumType: RoleType::class)]
@@ -53,7 +53,7 @@ class Link
      * @param Creatable $creatable
      * @param User $user
      */
-    public function __construct(int               $id,
+    public function __construct(?int               $id,
                                 DateTimeImmutable $creationDate,
                                 RoleType          $role,
                                 Creatable         $creatable,
@@ -66,12 +66,12 @@ class Link
         $this->user = $user;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId(?int $id): void
     {
         $this->id = $id;
     }

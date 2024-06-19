@@ -7,6 +7,8 @@ use App\Domain\Entities\Project;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class ProjectRepositoryImpl implements ProjectRepository{
 
@@ -42,9 +44,13 @@ class ProjectRepositoryImpl implements ProjectRepository{
         // TODO: Implement deleteProject() method.
     }
 
-    public function findById()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function findById(int $id):?Project
     {
-        // TODO: Implement findById() method.
+        return $this->entityManager->find(Project::class, $id);
     }
 
     public function findAll()
