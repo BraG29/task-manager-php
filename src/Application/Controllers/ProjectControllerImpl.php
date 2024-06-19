@@ -2,9 +2,12 @@
 
 namespace App\Application\Controllers;
 
+use App\Domain\Entities\Project;
 use App\Interface\ProjectController;
 use App\Domain\Repositories\ProjectRepository;
 use App\Interface\Dtos\ProjectDTO;
+use Doctrine\Common\Collections\ArrayCollection;
+use Exception;
 
 class ProjectControllerImpl implements ProjectController {
 
@@ -24,9 +27,21 @@ class ProjectControllerImpl implements ProjectController {
         // TODO: Implement getProjectDataByUser() method.
     }
 
-    public function createProject(ProjectDTO $project)
+    public function createProject(ProjectDTO $projectDTO): ?int
     {
-        // TODO: Implement createProject() method.
+        $newProject = new Project(
+            id: $projectDTO->getId(),
+            name: $projectDTO->getName(),
+            description: $projectDTO->getDescription(),
+            links: (array)null,
+            state: $projectDTO->isAvailable()
+        );
+        try{
+            return $this->projectRepository->createProject($newProject);
+        }catch (Exception $e){
+            echo "No se pudo dar de alta el Projecto: " . $projectDTO->getName() . " | " . $e->getMessage();
+            return 0;
+        }
     }
 
     public function editProject(ProjectDTO $project)

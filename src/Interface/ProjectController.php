@@ -12,9 +12,9 @@ interface ProjectController
 
     public function getProjectDataByUser(int $userId);
 
-    public function createProject(ProjectDTO $project);
+    public function createProject(ProjectDTO $projectDTO);
 
-    public function editProject(ProjectDTO $project);
+    public function editProject(ProjectDTO $projectDTO);
 
     public function deleteProject(int $projectId);
 

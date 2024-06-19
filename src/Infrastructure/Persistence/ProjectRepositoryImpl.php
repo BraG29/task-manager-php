@@ -5,6 +5,7 @@ namespace App\Infrastructure\Persistence;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Entities\Project;
 
+use App\Interface\Dtos\ProjectDTO;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
@@ -26,12 +27,13 @@ class ProjectRepositoryImpl implements ProjectRepository{
     {
         $this->entityManager = $entityManager;
         $this->repository = $entityManager->getRepository(Project::class);
-
     }
 
-    public function createProject()
+    public function createProject(Project $project): int
     {
-        // TODO: Implement createProject() method.
+        $this->entityManager->persist($project);
+        $this->entityManager->flush();
+        return $project->getId();
     }
 
     public function editProject()
@@ -57,8 +59,8 @@ class ProjectRepositoryImpl implements ProjectRepository{
         return $project;
     }
 
-    public function findAll()
+    public function findAll():?array
     {
-        // TODO: Implement findAll() method.
+        return $this->repository->findAll();
     }
 }
