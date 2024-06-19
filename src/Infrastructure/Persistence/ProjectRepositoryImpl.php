@@ -50,7 +50,11 @@ class ProjectRepositoryImpl implements ProjectRepository{
      */
     public function findById(int $id):?Project
     {
-        return $this->entityManager->find(Project::class, $id);
+        $project = $this->entityManager->find(Project::class, $id);
+        if (!$project) {
+            return null;
+        }
+        return $project;
     }
 
     public function findAll()
