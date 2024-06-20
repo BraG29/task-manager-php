@@ -64,12 +64,9 @@ interface UserController
     public function verifyEmail(int $userId): bool;
 
     public function updateRole(int $projectId, RoleType $role, int $userId): void;
+
     /*
      *
-getUsuariosEnProyecto(projectId: id): Set<User>
-invitarAProyecto(emisor: User, receptor: Usuario, mensaje: String)
-vincularAProyecto(user: Usuario)
-asignarRol(proyectoId: long, rol: Rol, user: User)
 updateUser(user: User)
      * */
 }

@@ -26,22 +26,31 @@ return function (App $app, UserController $userController) {
         if($user){
             if(!$user->isVerified()){
                 $response->getBody()->write(json_encode(['error' => 'Para poder iniciar sesion debes verificarte.']));
+                return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
 
             }else{
                 $generateJwt = require __DIR__ . '/generateJwt.php';
                 $response->getBody()->write(json_encode(['token' => $generateJwt($user)]));
-
                 return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
             }
         }else{
             $response->getBody()->write(json_encode(['error' => 'Credenciales incorrectas']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
-        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
     });
 
 //    Example: http://localhost:8080/users
     $app->get('/users', function (Request $request, Response $response, $args) use ($userController) {
         $users = $userController->getUsers();
+        $response->getBody()->write(json_encode($users));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    $app->get('/usersByProject', function (Request $request, Response $response, $args) use ($userController) {
+        $params = $request->getQueryParams();
+        $id = $params['userId'];
+
+        $users = $userController->getUsersByProject($id);
         $response->getBody()->write(json_encode($users));
         return $response->withHeader('Content-Type', 'application/json');
     });
@@ -98,7 +107,7 @@ return function (App $app, UserController $userController) {
 
             $role = RoleType::from((int)$role);
             $userController->inviteUserToProject($ownerId, $userId, $projectId, $role);
-            $response->getBody()->write("Correo de invitacion enviado con exito.");
+            $response->getBody()->write(json_encode("Correo de invitacion enviado con exito."));
             return $response;
 
         }catch(Exception $e){
@@ -108,5 +117,25 @@ return function (App $app, UserController $userController) {
         }
 
     });
+
+    $app->post('/linkUser', function (Request $request, Response $response, $args) use ($userController) {
+
+        $params = $request->getQueryParams();
+        $projectId = $params['projectId'];
+        $userId= $params['invitedId'];
+        $ownerId = $params['ownerId'];
+        $role = $params['role'];
+        $action = $params['action'];
+
+        if($action == 'accepted'){
+            $userController->linkUserToProject($ownerId, $userId, $projectId, $role);
+            $response->getBody()->write(json_encode("Usuario vinculado con exito."));
+            return $response;
+        }else{
+            return $response->getBody()->write(json_encode("El usuario rechazo la invitacion."));
+        }
+
+    });
+
 
 };

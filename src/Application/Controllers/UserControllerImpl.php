@@ -22,8 +22,8 @@ class UserControllerImpl implements UserController
 {
     private UserRepository $userRepository;
     private ProjectRepository $projectRepository;
-
     private LinkRepository $linkRepository;
+
     public function __construct(UserRepository $userRepository, ProjectRepository $projectRepository,
     LinkRepository $linkRepository){
 
@@ -69,18 +69,14 @@ class UserControllerImpl implements UserController
             /** @var ArrayCollection|Link[] $links */
             $links = $project->getLinks();
 
+            $users = [];
+
             foreach ($links as $link){
                 $user = $link->getUser();
 
-                $users[] = new UserDTO(
-                    $user->getId(),
-                    $user->getName(),
-                    $user->getLastName(),
-                    $user->getEmail(),
-                    $user->getPassword()
-                );
-            }
+                $users[] = new UserDTO($user);
 
+            }
             return $users;
 
         }catch(Exception $e){
@@ -137,8 +133,8 @@ class UserControllerImpl implements UserController
             'action' => 'accepted'
         ];
 
-        $invitationAccepted = "http://192.168.1.15:8080/invitation?" . http_build_query($queryParams);
-        $invitationRejected = "http://192.168.1.15:8080/invitation?action=rejected";
+        $invitationAccepted = "http://192.168.1.15:8080/linkUser?" . http_build_query($queryParams);
+        $invitationRejected = "http://192.168.1.15:8080/linkUser?action=rejected";
 
         $senderName = $sender->getName();
         $receiverName = $receiver->getName();
@@ -251,7 +247,6 @@ class UserControllerImpl implements UserController
         try{
 
             $user = $this->userRepository->findById($userId);
-            var_dump($user->isVerified());
             if(!$user->isVerified()){
                 $user->setVerified(true);
                 $this->userRepository->save($user);
@@ -260,15 +255,15 @@ class UserControllerImpl implements UserController
                 echo "este correo ya esta verificado.";
             }
         } catch (Exception $e){
-            throw $e;
+            echo "Error al verificar correo: " . $e->getMessage();
         }
-
         return false;
     }
 
     public function updateRole(int $projectId, RoleType $role, int $userId): void
     {
-        $project = $this->projectRepository->findById($projectId);
+        try{
+            $project = $this->projectRepository->findById($projectId);
 
             /** @var ArrayCollection|Link[] $links */    //esto indica que estoy esperando una lista de ORM.
             $links = $project->getLinks();
@@ -278,5 +273,8 @@ class UserControllerImpl implements UserController
                     $this->linkRepository->save($link);
                 }
             }
+        }catch (Exception $e){
+            echo "Ocurrio un error al actualizar rol: " . $e->getMessage();
+        }
     }
 }
