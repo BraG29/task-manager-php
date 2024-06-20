@@ -5,6 +5,7 @@ namespace App\Interface;
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\Dtos\ProjectDTO;
+use Couchbase\Role;
 use Exception;
 
 interface UserController
@@ -20,7 +21,7 @@ interface UserController
      */
     public function getUser(int $id) : ?UserDTO;
 
-    public function getUsersByProject(int $projectId);
+    public function getUsersByProject(int $projectId) : ?array;
 
     /**
      * Función para registrar un nuevo usuario en el sistema.
@@ -41,16 +42,17 @@ interface UserController
 
 
     /**
-     * Función para invitar un usuario a un proyecto.
-     * @param UserDTO $sender -> datos del usuario que envia la invitacion.
-     * @param UserDTO $receiver -> datos del usuario que recibe la invitacion.
+     * Función para enviar un mail a un suuario invitandolo a un proyecto..
+     * @param int $senderId -> id del usuario que envia la invitacion.
+     * @param int $receiverId -> id del usuario que recive la invitacion.
+     * @param int $projectId -> id del projecto a invitar.
      * @param RoleType $role -> rol que se le quiere dar al usuario.
-     * @return mixed
+     *
      */
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role): void;
+    public function inviteUserToProject(int $senderId, int $receiverId, int $projectId, RoleType $role): void;
 
     /**
-     * Función para vincular un usuario a un proyecto, cuando este acepta una  invitacion.
+     * Función para vincular un usuario a un proyecto, cuando este acepta una invitacion.
      * @param int $userOwnerId -> id del usuario dueño del proyecto.
      * @param int $userInvitedId -> id del usuario a invitar.
      * @param int $projectId -> id del proyecto a vincular.
@@ -61,12 +63,10 @@ interface UserController
 
     public function verifyEmail(int $userId): bool;
 
+    public function updateRole(int $projectId, RoleType $role, int $userId): void;
     /*
-     * registrar(user: User)
-iniciarSesion(user: User): boolean
-getDatosUsuario(userId: long): User
+     *
 getUsuariosEnProyecto(projectId: id): Set<User>
-getDatosUsuario(): Set<User> -> no se usa a priori
 invitarAProyecto(emisor: User, receptor: Usuario, mensaje: String)
 vincularAProyecto(user: Usuario)
 asignarRol(proyectoId: long, rol: Rol, user: User)

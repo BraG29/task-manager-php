@@ -1,6 +1,7 @@
 <?php
 
 use App\Application\Middlewares\JwtMiddleware;
+use App\Domain\Entities\Enums\RoleType;
 use App\Interface\UserController;
 
 use Psr\Http\Message\ResponseInterface as Response;
@@ -63,7 +64,7 @@ return function (App $app, UserController $userController) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
 
         }else{
-            $response->getBody()->write("Usuario creado con id: " . $userId);
+            $response->getBody()->write(json_encode("Usuario creado con id: " . $userId));
             return $response;
         }
     });
@@ -77,11 +78,35 @@ return function (App $app, UserController $userController) {
         $verification = $userController->verifyEmail($id);
 
         if($verification){
-            $response->getBody()->write("Correo verificado con exito.");
+            $response->getBody()->write(json_encode("Correo verificado con exito."));
             return $response;
         }else{
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
 
         }
     });
+
+    $app->post('/sendInvitation', function (Request $request, Response $response, $args) use ($userController) {
+
+        $params = $request->getParsedBody();
+        $projectId = $params['projectId'];
+        $userId= $params['invitedId'];
+        $ownerId = $params['ownerId'];
+        $role = $params['role'];
+
+        try{
+
+            $role = RoleType::from((int)$role);
+            $userController->inviteUserToProject($ownerId, $userId, $projectId, $role);
+            $response->getBody()->write("Correo de invitacion enviado con exito.");
+            return $response;
+
+        }catch(Exception $e){
+            $errorData = ['error' => $e->getMessage()];
+            $response->getBody()->write(json_encode($errorData));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+
+    });
+
 };

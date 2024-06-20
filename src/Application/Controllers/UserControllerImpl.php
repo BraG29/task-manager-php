@@ -7,6 +7,8 @@ use App\Domain\Entities\Enums\RoleType;
 use App\Domain\Entities\Link;
 use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
+use App\Domain\Repositories\ProjectRepository;
+use App\Domain\Repositories\LinkRepository;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\Dtos\ProjectDTO;
 use App\Interface\UserController;
@@ -19,9 +21,15 @@ use Exception;
 class UserControllerImpl implements UserController
 {
     private UserRepository $userRepository;
+    private ProjectRepository $projectRepository;
 
-    public function __construct(UserRepository $userRepository){
+    private LinkRepository $linkRepository;
+    public function __construct(UserRepository $userRepository, ProjectRepository $projectRepository,
+    LinkRepository $linkRepository){
+
         $this->userRepository = $userRepository;
+        $this->projectRepository = $projectRepository;
+        $this->linkRepository = $linkRepository;
     }
 
     /**
@@ -49,9 +57,37 @@ class UserControllerImpl implements UserController
         );
     }
 
-    public function getUsersByProject(int $projectId)
+    public function getUsersByProject(int $projectId) : ?array
     {
-        // TODO: Implement getUsersByProject() method.
+        try{
+            $project = $this->projectRepository->findById($projectId);
+
+            if($project == null){
+                throw new Exception("No se pudo encontrar el proyecto.");
+            }
+
+            /** @var ArrayCollection|Link[] $links */
+            $links = $project->getLinks();
+
+            foreach ($links as $link){
+                $user = $link->getUser();
+
+                $users[] = new UserDTO(
+                    $user->getId(),
+                    $user->getName(),
+                    $user->getLastName(),
+                    $user->getEmail(),
+                    $user->getPassword()
+                );
+            }
+
+            return $users;
+
+        }catch(Exception $e){
+            echo "Ocurrio un error" . $e->getMessage();
+            return null;
+        }
+
     }
 
     public function signIn(string $email, string $password): ?UserDTO
@@ -69,18 +105,69 @@ class UserControllerImpl implements UserController
         return null;
     }
 
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, ProjectDTO $project, RoleType $role): void
+    public function inviteUserToProject(int $senderId, int $receiverId, int $projectId, RoleType $role): void
     {
 
+        $receiver = $this->userRepository->findById($receiverId);
+        $sender = $this->userRepository->findById($senderId);
+
+        if($receiverId == null || $senderId == null){
+            throw new Exception("Ocurrio un error al buscar usuarios");
+        }
+
+        if($receiverId == $senderId){
+            throw new Exception("No puedes agregarte al proyecto.");
+        }
+
+        $project = $this->projectRepository->findById($projectId);
+
+        if ($project === null) {
+            throw new Exception("Proyecto no encontrado.");
+        }
+
         $r = $receiver->getEmail();
+
         $subject = "Te han invitado a un proyecto!";
-        $aceptationLink = "http://localhost:8080/invitationAccepted";
-        $message = $sender->getName() . " te ha invitado a unirte a su proyecto: " . $project->getName(). "
-        Presiona el link para aceptar: " . $aceptationLink;
 
-        // TODO: ver como enviar al endpoint de linkear usuario desde el mensaje, con los parametros.
-        //sendMail($r, $subject, $message);
+        $queryParams = [
+            'userOwnerId' => $senderId,
+            'userInvitedId' => $receiverId,
+            'projectId' => $projectId,
+            'role' => $role,
+            'action' => 'accepted'
+        ];
 
+        $invitationAccepted = "http://192.168.1.15:8080/invitation?" . http_build_query($queryParams);
+        $invitationRejected = "http://192.168.1.15:8080/invitation?action=rejected";
+
+        $senderName = $sender->getName();
+        $receiverName = $receiver->getName();
+        $projectName = $project->getTitle();
+
+        $message = "
+                <html>
+                <body>
+                    <p>Hola! $receiverName, el usuario: 
+                    $senderName te ha invitado a unirte a su proyecto $projectName</p>
+                    <br>
+                    <p>
+                    Haz clic en uno de los sigueintes botones, para aceptar o rechazar la invitacion:</p>
+                    <br>
+                  
+                    <a href='$invitationAccepted'>
+                        <button style='padding: 15px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Aceptar invitacion</button>
+                    </a>
+                    
+                     <a href='$invitationRejected'>
+                        <button style='padding: 15px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Rechazar invitacion</button>
+                    </a>
+                   
+                </body>
+                </html>
+            ";
+
+        $sendMail = require __DIR__ . '/../../../app/sendEmail.php';
+        $sendMail($r, $subject, $message);
     }
 
     public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void
@@ -89,21 +176,24 @@ class UserControllerImpl implements UserController
             $userInvited = $this->userRepository->findById($userInvitedId);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
-            foreach ($projectOwner->getLinks() as $link){
+            /** @var ArrayCollection|Link[] $links */
+            $links = $projectOwner->getLinks();
+
+            foreach ($links as $link){
+
                 //si usuario tiene un vinculo con el projecto y es ADMIN del mismo.
-                if($link->getCreatable()->getId() == $projectId ||  $link->getRole() == RoleType::ADMIN){
+                if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
                     $project = $link->getCreatable(); //obtengo proyecto.
 
                     $newLink = new Link(null, new \DateTimeImmutable(), $role, $project, $userInvited);
 
-                    $userInvited->getLinks()->add($newLink);
-
+                    $this->linkRepository->save($newLink);
                     $this->userRepository->save($userInvited);
                 }
             }
 
         }catch (Exception $e){
-            throw $e;
+            echo "Error al enviar el vincular usuario a proyecto: " . $e->getMessage();
         }
 
     }
@@ -111,7 +201,6 @@ class UserControllerImpl implements UserController
     public function registerUser(UserDTO $userDTO): int
     {
 
-        //TODO hashear contraseña
         $user = new User(
             $userDTO->getId(),
             $userDTO->getName(),
@@ -175,5 +264,19 @@ class UserControllerImpl implements UserController
         }
 
         return false;
+    }
+
+    public function updateRole(int $projectId, RoleType $role, int $userId): void
+    {
+        $project = $this->projectRepository->findById($projectId);
+
+            /** @var ArrayCollection|Link[] $links */    //esto indica que estoy esperando una lista de ORM.
+            $links = $project->getLinks();
+            foreach ($links as $link) {
+                if ($link->getUser()->getId() == $userId) {
+                    $link->setRole($role);
+                    $this->linkRepository->save($link);
+                }
+            }
     }
 }
