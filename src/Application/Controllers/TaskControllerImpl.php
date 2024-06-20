@@ -33,9 +33,10 @@ class TaskControllerImpl implements TaskController{
         return null ;
     }
 
+    //NOT TESTED
     public function getTasksByProject(int $projectId): array
     {
-        return $this->repository->findTasksByProject($projectId);
+        return $this->taskRepository->findTasksByProject($projectId);
     }
 
     //ask los pibes if it's correct for the TaskDTO to have just projectID instead
@@ -55,6 +56,9 @@ class TaskControllerImpl implements TaskController{
     //BE AWARE as this function needs to give back an int to check
     //the exceptions it might generate
     //I gotta see if THIS is where I check for the project's existence
+    //TESTED uwu
+    //TODO: I have to link the user that created the task: create Link -> and add it to the user
+    //check user has the project that the task belongs to AND it's admin
     public function createTask(TaskDTO $taskDTO): ?int
     {
         //We find the project that the task belongs to
@@ -87,9 +91,14 @@ class TaskControllerImpl implements TaskController{
 
     }
 
-    public function updateTask(Task $taskId)
-    {
-        // TODO: Implement updateTask() method.
+    public function updateTask(Task $taskId){
+
+        try {
+            $this->taskRepository->updateTask($taskId);
+        }catch (Exception $e){
+
+        }
+
     }
 
     public function deleteTask(int $taskId)

@@ -99,35 +99,6 @@ public function jsonSerialize(): array{
         ];
 }
 
-//ublic function __construct(
-//     int $id,
-//     string $title,
-//     string $description,
-//     array $links,
-//     int $project,
-//     State $taskState,
-//     DateTimeImmutable $limitDate ): TaskDTO
-
-/*
- *                 $data['id']?? null,
-                $data['title'],
-                $data['description'],
-                new ArrayCollection($data['links']),
-                $data['project'],
-                $data['taskState'],
-                $data['limitDate'],
-
-            new Task(
-                $data['id'] ?? null,
-                $data['title'] ,
-                $DataTime ,
-                $data['description'] ,
-                $taskState,
-                $data['project']
-            )
-        );
- */
-
     /**
      * @throws \Exception
      */
