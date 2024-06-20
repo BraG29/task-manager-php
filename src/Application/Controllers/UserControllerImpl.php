@@ -8,6 +8,7 @@ use App\Domain\Entities\Link;
 use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
 use App\Domain\Repositories\ProjectRepository;
+use App\Domain\Repositories\LinkRepository;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\Dtos\ProjectDTO;
 use App\Interface\UserController;
@@ -22,9 +23,13 @@ class UserControllerImpl implements UserController
     private UserRepository $userRepository;
     private ProjectRepository $projectRepository;
 
-    public function __construct(UserRepository $userRepository, ProjectRepository $projectRepository){
+    private LinkRepository $linkRepository;
+    public function __construct(UserRepository $userRepository, ProjectRepository $projectRepository,
+    LinkRepository $linkRepository){
+
         $this->userRepository = $userRepository;
         $this->projectRepository = $projectRepository;
+        $this->linkRepository = $linkRepository;
     }
 
     /**
@@ -52,9 +57,37 @@ class UserControllerImpl implements UserController
         );
     }
 
-    public function getUsersByProject(int $projectId)
+    public function getUsersByProject(int $projectId) : ?array
     {
-        // TODO: Implement getUsersByProject() method.
+        try{
+            $project = $this->projectRepository->findById($projectId);
+
+            if($project == null){
+                throw new Exception("No se pudo encontrar el proyecto.");
+            }
+
+            /** @var ArrayCollection|Link[] $links */
+            $links = $project->getLinks();
+
+            foreach ($links as $link){
+                $user = $link->getUser();
+
+                $users[] = new UserDTO(
+                    $user->getId(),
+                    $user->getName(),
+                    $user->getLastName(),
+                    $user->getEmail(),
+                    $user->getPassword()
+                );
+            }
+
+            return $users;
+
+        }catch(Exception $e){
+            echo "Ocurrio un error" . $e->getMessage();
+            return null;
+        }
+
     }
 
     public function signIn(string $email, string $password): ?UserDTO
@@ -122,11 +155,11 @@ class UserControllerImpl implements UserController
                     <br>
                   
                     <a href='$invitationAccepted'>
-                        <button style='padding: 10px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Aceptar invitacion</button>
+                        <button style='padding: 15px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Aceptar invitacion</button>
                     </a>
                     
                      <a href='$invitationRejected'>
-                        <button style='padding: 10px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Rechazar invitacion</button>
+                        <button style='padding: 15px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Rechazar invitacion</button>
                     </a>
                    
                 </body>
@@ -149,13 +182,12 @@ class UserControllerImpl implements UserController
             foreach ($links as $link){
 
                 //si usuario tiene un vinculo con el projecto y es ADMIN del mismo.
-                if($link->getCreatable()->getId() == $projectId ||  $link->getRole() == RoleType::ADMIN){
+                if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
                     $project = $link->getCreatable(); //obtengo proyecto.
 
                     $newLink = new Link(null, new \DateTimeImmutable(), $role, $project, $userInvited);
 
-                    //TODO Solo falta persistir link,hacer oper o crear repo.
-                    $userInvited->getLinks()->add($newLink); //añado link al usuario.
+                    $this->linkRepository->save($newLink);
                     $this->userRepository->save($userInvited);
                 }
             }
@@ -243,7 +275,7 @@ class UserControllerImpl implements UserController
             foreach ($links as $link) {
                 if ($link->getUser()->getId() == $userId) {
                     $link->setRole($role);
-                    //TODO hacer update en bd.
+                    $this->linkRepository->save($link);
                 }
             }
     }

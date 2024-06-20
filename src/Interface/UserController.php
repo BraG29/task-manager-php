@@ -21,7 +21,7 @@ interface UserController
      */
     public function getUser(int $id) : ?UserDTO;
 
-    public function getUsersByProject(int $projectId);
+    public function getUsersByProject(int $projectId) : ?array;
 
     /**
      * Función para registrar un nuevo usuario en el sistema.
