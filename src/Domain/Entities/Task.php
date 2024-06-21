@@ -23,7 +23,7 @@ class Task extends Creatable
      * </p>
      */
 
-    #[ORM\Column(enumType: State::class)]
+    #[ORM\Column(name: 'task_state', enumType: State::class)]
     private State $taskState;
 
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
