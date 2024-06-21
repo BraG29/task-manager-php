@@ -18,7 +18,8 @@ return function (App $app, UserController $userController) {
     })->add(JwtMiddleware::class);
 
     $app->post('/login', function (Request $request, Response $response, $args) use ($userController) {
-        $data = $request->getParsedBody();
+        $json = $request->getBody();
+        $data = json_decode($json, true);
         $email = $data['email'];
         $password = $data['password'];
         $user = $userController->signIn($email, $password);
@@ -64,7 +65,8 @@ return function (App $app, UserController $userController) {
     });
 
     $app->post('/users', function (Request $request, Response $response, $args) use ($userController) {
-        $data = $request->getParsedBody();
+        $json = $request->getBody();
+        $data = json_decode($json, true);
         $userDto = UserDTO::fromArray($data);
 
         $userId = $userController->registerUser($userDto);
