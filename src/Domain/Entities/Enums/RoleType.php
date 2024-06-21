@@ -30,4 +30,5 @@ enum RoleType: int
     case EDITOR = 1;
     case READER = 2;
     case RESPONSIBLE = 3;
+
 }
