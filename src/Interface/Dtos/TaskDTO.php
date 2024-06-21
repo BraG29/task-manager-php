@@ -12,6 +12,7 @@ class TaskDTO extends CreatableDTO{
     private DateTimeImmutable $limitDate;
     private State $taskState;
     private int $project;
+    private int $userID;
 
     /**
      * @param int $id
@@ -29,12 +30,14 @@ class TaskDTO extends CreatableDTO{
                                                 array | null $links,
                                                 int $project,
                                                 State $taskState,
-                                                DateTimeImmutable $limitDate){
+                                                DateTimeImmutable $limitDate,
+                                                int $userID){
 
         parent::__construct($id,  $title,  $description,  $links);
         $this->project = $project;
         $this->taskState = $taskState;
         $this->limitDate = $limitDate;
+        $this->userID = $userID;
     }
 
     /**
@@ -107,14 +110,48 @@ public function jsonSerialize(): array{
     $DataTime = new DateTimeImmutable($data['limitDate']);
     $taskState = State::from($data['taskState']);
 
+    //I get all the links from the data array
+    $links = $data['links'];
+
+    //I preemptively create an array which will hold all linkDTOs
+    $linksDTOArray = array();
+
+    foreach ($links as $currentLink){//for each linkDTO in links
+
+        $linkDTO =  LinkDTO::fromArray($currentLink);//create linkDTO object from the data
+
+        $linksDTOArray = array_push($linksDTOArray, $linkDTO);//push it into the array
+    }
+
+
+
+    //TODO adjust the constructor so I can create LinkDTO when getting data  from the endpoint array
+
         return new self(
             $data['id'] ?? null,
             $data['title'] ,
             $data['description'] ,
-            $data['links'] ?? null,
-                $data['project'],
+            $linksDTOArray,
+            $data['project'],
             $taskState,
-            $DataTime);
+            $DataTime,
+            $data['userID']);
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserID(): int
+    {
+        return $this->userID;
+    }
+
+    /**
+     * @param int $userID
+     */
+    public function setUserID(int $userID): void
+    {
+        $this->userID = $userID;
     }
 
 

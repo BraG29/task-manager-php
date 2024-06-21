@@ -3,7 +3,6 @@
 namespace App\Interface\Dtos;
 
 use App\Domain\Entities\Enums\RoleType;
-use App\Domain\Entities\User;
 use DateTimeImmutable;
 use JsonSerializable;
 
@@ -12,11 +11,14 @@ class LinkDTO implements JsonSerializable{
     private ?int $id;
     private DateTimeImmutable $creationDate;
     private RoleType $role;
-    private CreatableDTO $creatableDTO;
-    private User $user;
+    private CreatableDTO | null $creatableDTO;
+    private UserDTO $user;
 
-    public function __construct(?int $id, DateTimeImmutable $creationDate, RoleType $role, CreatableDTO $creatableDTO, User $user)
-    {
+    public function __construct(?int $id,
+                                DateTimeImmutable $creationDate,
+                                RoleType $role,
+                                CreatableDTO | null $creatableDTO,
+                                UserDTO $user){
         $this->id = $id;
         $this->creationDate = $creationDate;
         $this->role = $role;
@@ -24,14 +26,16 @@ class LinkDTO implements JsonSerializable{
         $this->user = $user;
     }
 
-    public static function fromArray($data): LinkDTO
-    {
+    public static function fromArray($data): LinkDTO{
+
+        $userDTO = UserDTO::fromArray($data['user']);
+
         return new LinkDTO(
             $data['id'],
             $data['creationDate'],
             $data['role'],
             $data['creatable'],
-            $data['user']
+            $userDTO
         );
     }
 
@@ -68,9 +72,9 @@ class LinkDTO implements JsonSerializable{
     }
 
     /**
-     * @return User
+     * @return UserDTO
      */
-    public function getUser(): User
+    public function getUser(): UserDTO
     {
         return $this->user;
     }

@@ -97,7 +97,7 @@ class UserDTO implements JsonSerializable
      * @param array $data
      * @return UserDTO
      */
-    public static function fromArray(array $data) : UserDTO
+    public static function fromArray(array | null $data) : UserDTO
     {
 
         return new self(

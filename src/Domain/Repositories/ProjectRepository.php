@@ -10,7 +10,7 @@ use App\Infrastructure\Persistence\ProjectRepositoryImpl;
 interface ProjectRepository
 {
 
-    public  function createProject();
+    public function createProject(Project $project): int;
     public  function editProject();
     public  function deleteProject();
     public function findById(int $id):?Project;

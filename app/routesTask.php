@@ -14,7 +14,8 @@ return function (App $app, TaskController $taskController) {
     //hay ejemplos en usuario
     $app->post("/tasks/create", function (Request $request, Response $response, $args) use ($taskController) {
 
-        $data = $request->getParsedBody();
+        $json = $request->getBody();
+        $data = json_decode($json, true);
         $taskDTO = TaskDTO::fromArray($data);
 
         $taskId = $taskController->createTask($taskDTO);

@@ -2,13 +2,18 @@
 
 namespace App\Application\Controllers;
 
+use App\Domain\Entities\Enums\RoleType;
+use App\Domain\Entities\Link;
 use App\Domain\Entities\Task;
+use App\Domain\Repositories\LinkRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\TaskRepository;
+use App\Domain\Repositories\UserRepository;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
 use Exception;
 use App\Domain\Entities\Enums\State;
+use DateTimeImmutable;
 
 class TaskControllerImpl implements TaskController{
 
@@ -16,12 +21,16 @@ class TaskControllerImpl implements TaskController{
     //los controladores van a tener acceso a varios repositorios para propósitos de lógica
     private TaskRepository $taskRepository;
     private ProjectRepository $projectRepository;
+    private  LinkRepository $linkRepository;
+    private userRepository $userRepository;
 
     //------------------------------------------------------------------------------------------
     //hay que añadir los repositorios a inyectar al parametro del constructor
-    public function __construct(TaskRepository $taskRepository, ProjectRepository $projectRepository){
+    public function __construct(TaskRepository $taskRepository, ProjectRepository $projectRepository, LinkRepository $linkRepository, UserRepository $userRepository){
         $this->taskRepository = $taskRepository;
         $this->projectRepository = $projectRepository;
+        $this->linkRepository = $linkRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function getTasksByUser(int $userId): ?array
@@ -41,6 +50,7 @@ class TaskControllerImpl implements TaskController{
 
     //ask los pibes if it's correct for the TaskDTO to have just projectID instead
     //of an actual projectDTO
+    //TODO: finish this function, getting the id from the user through the project ID connected to the task
     public function getTaskById(int $taskId): ?TaskDTO
     {
         $task = $this->taskRepository->findById($taskId);
@@ -50,7 +60,8 @@ class TaskControllerImpl implements TaskController{
                                         $task->getLinks(),
                                         $task->getProject()->getId(),
                                         $task->getTaskState(),
-                                        $task->getLimitDate());
+                                        $task->getLimitDate(),
+                                        null);
     }
 
     //BE AWARE as this function needs to give back an int to check
@@ -76,7 +87,35 @@ class TaskControllerImpl implements TaskController{
                     $projectTask);
 
                 //we try to persist the task
-                return $this->taskRepository->addTask($task);
+                $taskID = $this->taskRepository->addTask($task);
+
+                //now we try to find the user that is creating the task
+                $userToCheck = $this->userRepository->findById($taskDTO->getUserID());
+
+                //we iterate through all the Links the task comes with
+                /*
+                foreach ($taskDTO->getLinks() as $link) {
+
+                    //we create the link between task and user
+                    $linkToAdd = new Link(null,
+                                                        new DateTimeImmutable('now'),
+                                                        $link->getRole(),
+                                                        $task,
+                                                        $userToCheck);
+
+                    //we persist the link
+                    $this->linkRepository->save($linkToAdd);
+                }*/
+                $linkToAdd = new Link(null,
+                    new DateTimeImmutable('now'),
+                    RoleType::ADMIN,
+                    $task,
+                    $userToCheck);
+
+                //we persist the link
+                $this->linkRepository->save($linkToAdd);
+
+                return $taskID;
 
             } catch (Exception $e) {
 
