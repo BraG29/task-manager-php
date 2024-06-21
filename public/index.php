@@ -3,6 +3,7 @@
 use App\Interface\ProjectController;
 use App\Interface\TaskController;
 use DI\ContainerBuilder;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Factory\AppFactory;
 use Doctrine\ORM\EntityManager;
 use App\Interface\UserController;
@@ -25,6 +26,8 @@ $container = $containerBuilder->build();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
+$routes = require __DIR__ . '/../app/routes.php';
+$routes($app);
 
 $routesUser = require __DIR__ . '/../app/routesUser.php';
 $routesUser($app, $container->get(UserController::class));
@@ -34,5 +37,9 @@ $routesProject($app, $container->get(ProjectController::class));
 
 $routesTask = require __DIR__ . '/../app/routesTask.php';
 $routesTask($app, $container->get(TaskController::class));
+
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function ($request, $response) {
+    throw new HttpNotFoundException($request);
+});
 
 $app->run();
