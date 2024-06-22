@@ -3,7 +3,6 @@
 use App\Application\Middlewares\JwtMiddleware;
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\UserController;
-
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -47,13 +46,20 @@ return function (App $app, UserController $userController) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
-    $app->get('/usersByProject', function (Request $request, Response $response, $args) use ($userController) {
-        $params = $request->getQueryParams();
-        $id = $params['userId'];
+    $app->get('/usersByProject/{id}', function (Request $request, Response $response, $args) use ($userController) {
+        $id = $args['id'];
+        try{
 
-        $users = $userController->getUsersByProject($id);
-        $response->getBody()->write(json_encode($users));
-        return $response->withHeader('Content-Type', 'application/json');
+            $projects = $userController->getUsersByProject($id);
+            $response->getBody()->write(json_encode($projects));
+            return $response->withHeader('Content-Type', 'application/json');
+
+        }catch(Exception $e){
+            $response->getBody()->write(json_encode(["error" => $e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+
+
     });
     
 //    Example: http://localhost:8080/users/1
@@ -109,7 +115,7 @@ return function (App $app, UserController $userController) {
 
             $role = RoleType::from((int)$role);
             $userController->inviteUserToProject($ownerId, $userId, $projectId, $role);
-            $response->getBody()->write(json_encode("Correo de invitacion enviado con exito."));
+            $response->getBody()->write(json_encode("Correo de invitacion enviado con exito"));
             return $response;
 
         }catch(Exception $e){
@@ -120,24 +126,72 @@ return function (App $app, UserController $userController) {
 
     });
 
-    $app->post('/linkUser', function (Request $request, Response $response, $args) use ($userController) {
+    $app->get('/linkUser', function (Request $request, Response $response, $args) use ($userController) {
 
         $params = $request->getQueryParams();
-        $projectId = $params['projectId'];
-        $userId= $params['invitedId'];
-        $ownerId = $params['ownerId'];
-        $role = $params['role'];
-        $action = $params['action'];
 
-        if($action == 'accepted'){
-            $userController->linkUserToProject($ownerId, $userId, $projectId, $role);
-            $response->getBody()->write(json_encode("Usuario vinculado con exito."));
-            return $response;
-        }else{
-            return $response->getBody()->write(json_encode("El usuario rechazo la invitacion."));
+        try{
+            $projectId = $params['projectId'];
+            $userId= $params['userInvitedId'];
+            $ownerId = $params['userOwnerId'];
+            $roleName =  isset($params['role']['value']) ? intval($params['role']['value']) : null;
+            $action = $params['action'];
+
+            $role = RoleType::from($roleName);
+
+            if($action == 'accepted'){
+                $userController->linkUserToProject(intval($ownerId), intval($userId), intval($projectId), $role);
+                $response->getBody()->write(json_encode(["Usuario vinculado con exito."]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+            }else{
+                $response->getBody()->write(json_encode("El usuario rechazado la invitacion."));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+            }
+        }catch (Exception $e){
+            $errorData = ['error' => $e->getMessage()];
+            $response->getBody()->write(json_encode($errorData));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
 
     });
 
+
+    $app->post('/updateRole', function (Request $request, Response $response, $args) use ($userController) {
+
+        $params = $request->getParsedBody();
+
+        try{
+            $projectId = $params['projectId'];
+            $userId= $params['userId'];
+            $roleName = $params['role'];
+
+            $role = RoleType::from($roleName);
+            $userController->updateRole($projectId, $role, $userId);
+            $response->getBody()->write(json_encode(["Usuario vinculado con exito."]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+
+        }catch(Exception $e){
+            $errorData = ['error' => $e->getMessage()];
+            $response->getBody()->write(json_encode($errorData));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+    });
+
+    $app->put('/updateUser', function (Request $request, Response $response, $args) use ($userController) {
+
+        try {
+            $json = $request->getBody();
+            $data = json_decode($json, true);
+            $userDTO = UserDTO::fromArray($data);
+            $userController->updateUser($userDTO);
+
+            $response->getBody()->write(json_encode(["message" => "Usuario actualizado con éxito."]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode(["error" => $e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+    });
 
 };

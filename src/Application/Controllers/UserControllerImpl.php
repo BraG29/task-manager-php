@@ -10,7 +10,6 @@ use App\Domain\Repositories\UserRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\LinkRepository;
 use App\Interface\Dtos\UserDTO;
-use App\Interface\Dtos\ProjectDTO;
 use App\Interface\UserController;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
@@ -57,6 +56,7 @@ class UserControllerImpl implements UserController
         );
     }
 
+
     public function getUsersByProject(int $projectId) : ?array
     {
         try{
@@ -80,8 +80,7 @@ class UserControllerImpl implements UserController
             return $users;
 
         }catch(Exception $e){
-            echo "Ocurrio un error" . $e->getMessage();
-            return null;
+            throw $e;
         }
 
     }
@@ -140,6 +139,7 @@ class UserControllerImpl implements UserController
         $receiverName = $receiver->getName();
         $projectName = $project->getTitle();
 
+
         $message = "
                 <html>
                 <body>
@@ -147,7 +147,7 @@ class UserControllerImpl implements UserController
                     $senderName te ha invitado a unirte a su proyecto $projectName</p>
                     <br>
                     <p>
-                    Haz clic en uno de los sigueintes botones, para aceptar o rechazar la invitacion:</p>
+                    Haz clic en uno de los siguientes botones, para aceptar o rechazar la invitacion:</p>
                     <br>
                   
                     <a href='$invitationAccepted'>
@@ -172,11 +172,17 @@ class UserControllerImpl implements UserController
             $userInvited = $this->userRepository->findById($userInvitedId);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
+            if($userInvited == null || $projectOwner == null){
+                throw new Exception("Ocurrio un error al buscar usuarios");
+            }
+
+            if ($this->isUserLinkedToProject($userInvited, $projectId)) {
+                throw new Exception("El usuario ya se encuentra vinculado al proyecto.");
+            }
+
             /** @var ArrayCollection|Link[] $links */
             $links = $projectOwner->getLinks();
-
             foreach ($links as $link){
-
                 //si usuario tiene un vinculo con el projecto y es ADMIN del mismo.
                 if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
                     $project = $link->getCreatable(); //obtengo proyecto.
@@ -189,9 +195,20 @@ class UserControllerImpl implements UserController
             }
 
         }catch (Exception $e){
-            echo "Error al enviar el vincular usuario a proyecto: " . $e->getMessage();
+            throw $e;
         }
 
+    }
+
+    //Funcion auxiliar de linkUserToProject
+    private function isUserLinkedToProject($user, int $projectId): bool
+    {
+        foreach ($user->getLinks() as $link) {
+            if ($link->getCreatable()->getId() === $projectId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function registerUser(UserDTO $userDTO): int
@@ -255,7 +272,7 @@ class UserControllerImpl implements UserController
                 echo "este correo ya esta verificado.";
             }
         } catch (Exception $e){
-            echo "Error al verificar correo: " . $e->getMessage();
+            throw $e;
         }
         return false;
     }
@@ -264,6 +281,10 @@ class UserControllerImpl implements UserController
     {
         try{
             $project = $this->projectRepository->findById($projectId);
+
+            if($role = RoleType::ADMIN){
+                throw new Exception("No puedes dar rol de administardor");
+            }
 
             /** @var ArrayCollection|Link[] $links */    //esto indica que estoy esperando una lista de ORM.
             $links = $project->getLinks();
@@ -274,7 +295,25 @@ class UserControllerImpl implements UserController
                 }
             }
         }catch (Exception $e){
-            echo "Ocurrio un error al actualizar rol: " . $e->getMessage();
+            throw $e;
         }
+    }
+
+    public function updateUser(UserDTO $userDTO) : int{
+
+        $user = $this->userRepository->findById($userDTO->getId());
+
+        if($user == null){
+            throw new Exception ("No se pudo encontrar el usuario");
+        }
+
+        $user->setName($userDTO->getName());
+        $user->setLastName($userDTO->getLastName());
+        $user->setEmail($userDTO->getEmail());
+        $user->setPassword($userDTO->getPassword());
+
+        $this->userRepository->save($user);
+
+        return $user->getId();
     }
 }
