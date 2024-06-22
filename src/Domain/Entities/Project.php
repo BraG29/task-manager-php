@@ -18,10 +18,10 @@ class Project extends Creatable {
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project')]
     private Collection $tasks;
 
-    public function __construct(int    $id,
+    public function __construct(?int    $id,
                                 string $name,
                                 string $description,
-                                array  $links,
+                                ?array  $links,
                                 bool   $state)
     {
         parent::__construct($id, $name, $description, $links);

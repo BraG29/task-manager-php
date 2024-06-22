@@ -29,6 +29,10 @@ class ProjectRepositoryImpl implements ProjectRepository{
         $this->repository = $entityManager->getRepository(Project::class);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function createProject(Project $project): int
     {
         $this->entityManager->persist($project);
