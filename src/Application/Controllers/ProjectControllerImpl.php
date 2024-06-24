@@ -22,72 +22,21 @@ class ProjectControllerImpl implements ProjectController {
     private UserRepository $userRepository;
     private LinkRepository $linkRepository;
 
+
     public function __construct(ProjectRepository  $projectRepository, UserRepository $userRepository, LinkRepository $linkRepository){
         $this->projectRepository = $projectRepository;
         $this->userRepository = $userRepository;
         $this->linkRepository = $linkRepository;
     }
 
-    /**
-     * @throws Exception
-     */
-    public function getProjectData(int $projectId): ?ProjectDTO
+    public function getProjectData(int $projectId)
     {
-        $project = $this->projectRepository->findById($projectId);
-
-        if (!$project) {
-            throw new Exception('Project not found');
-        }
-
-        $links = $project->getLinks();
-
-        $arraylinks = [];
-        foreach ($links as $link) {
-            $arraylinks[] = $link->toArray();
-        }
-
-        $projectDTOClass = ProjectDTO::class;
-        return new $projectDTOClass(
-            id: $project->getId(),
-            name: $project->getTitle(),
-            description: $project->getDescription(),
-            state: $project->isAvailable(),
-            users: $arraylinks,
-            tasks: $project->getTasks()
-        );
-
+        // TODO: Implement getProjectData() method.
     }
 
-    /**
-     * @param int $userId
-     * @return array|null
-     */
-    public function getProjectDataByUser(int $userId): ?array
+    public function getProjectDataByUser(int $userId)
     {
-        $this->userRepository->findById($userId);
-
-        $user = $this->userRepository->findById($userId);
-        $linkSet = $user->getLinks();
-
-        $arraylinks = [];
-        $projectDTOArray = [];
-        foreach ($linkSet as $link) {
-            $arraylinks[] = $link->toArray();
-        }
-        foreach ($arraylinks as $link) {
-            if($link->getCreatable() instanceof Project){
-                $project = $link->getCreatable();
-                $projectDTOArray[] = new ProjectDTO(
-                    id: $project->getId(),
-                    name: $project->getTitle(),
-                    description: $project->getDescription(),
-                    state: $project->isAvailable(),
-                    users: $arraylinks,
-                    tasks: $project->getTasks()
-                );
-            }
-        }
-        return $projectDTOArray;
+        // TODO: Implement getProjectDataByUser() method.
     }
 
     /**
@@ -95,6 +44,7 @@ class ProjectControllerImpl implements ProjectController {
      */
     public function createProject(ProjectDTO $projectDTO, int $userId): ?int
     {
+
         $newProject = new Project(
             id: null,
             name: $projectDTO->getName(),
@@ -112,6 +62,7 @@ class ProjectControllerImpl implements ProjectController {
         );
 
         try{
+
             $this->projectRepository->createProject($newProject);
             $newProject->addLink($link);
             $this->linkRepository->save($link);
@@ -126,7 +77,7 @@ class ProjectControllerImpl implements ProjectController {
 
     public function editProject(ProjectDTO $projectDTO)
     {
-        
+        // TODO: Implement editProject() method.
     }
 
     public function deleteProject(int $projectId)

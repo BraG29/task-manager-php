@@ -58,5 +58,4 @@ class Project extends Creatable {
         $this->tasks = $tasks;
     }
 
-
 }
