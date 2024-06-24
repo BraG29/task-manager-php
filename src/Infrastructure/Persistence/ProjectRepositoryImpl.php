@@ -40,14 +40,23 @@ class ProjectRepositoryImpl implements ProjectRepository{
         return $project->getId();
     }
 
-    public function editProject()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function editProject(Project $project): int
     {
-        // TODO: Implement editProject() method.
+        $this->entityManager->persist($project);
+        $this->entityManager->flush();
+        return $project->getId();
     }
 
-    public function deleteProject()
+    public function deleteProject(int $projectId): int
     {
-        // TODO: Implement deleteProject() method.
+        $project = $this->entityManager->find(Project::class, $projectId);
+        $this->entityManager->remove($project);
+        $this->entityManager->flush();
+        return $projectId;
     }
 
     /**

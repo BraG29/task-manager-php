@@ -124,13 +124,32 @@ class ProjectControllerImpl implements ProjectController {
         }
     }
 
-    public function editProject(ProjectDTO $projectDTO)
+    public function editProject(ProjectDTO $projectDTO): ?int
     {
-        
+        if ($projectDTO->getId() !== $this->projectRepository->findById($projectDTO->getId())) {
+            return 0;
+        }
+
+        $project = new Project(
+            id: $projectDTO->getId(),
+            name: $projectDTO->getName(),
+            description: $projectDTO->getDescription(),
+            links: $projectDTO->getUsers(),
+            state: $projectDTO->isAvailable(),
+        );
+
+        foreach ($projectDTO->getTasks() as $task) {
+            $project->addTask($task);
+        }
+
+        return $this->projectRepository->editProject($project);
     }
 
-    public function deleteProject(int $projectId)
+    public function deleteProject(int $projectId): int
     {
-        // TODO: Implement deleteProject() method.
+        if ($this->projectRepository->findById($projectId) === null) {
+            return 0;
+        }
+        return $this->projectRepository->deleteProject($projectId);
     }
 }
