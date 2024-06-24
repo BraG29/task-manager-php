@@ -5,6 +5,7 @@ namespace App\Application\Controllers;
 
 use App\Domain\Entities\Enums\RoleType;
 use App\Domain\Entities\Link;
+use App\Domain\Entities\Project;
 use App\Domain\Entities\User;
 use App\Domain\Repositories\UserRepository;
 use App\Domain\Repositories\ProjectRepository;
@@ -172,6 +173,9 @@ class UserControllerImpl implements UserController
             $userInvited = $this->userRepository->findById($userInvitedId);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
+
+
+
             if($userInvited == null || $projectOwner == null){
                 throw new Exception("Ocurrio un error al buscar usuarios");
             }
@@ -180,17 +184,31 @@ class UserControllerImpl implements UserController
                 throw new Exception("El usuario ya se encuentra vinculado al proyecto.");
             }
 
+            /*
+            else{
+                throw new Exception("No hay un proyecto con una tarea.");
+            }*/
+
             /** @var ArrayCollection|Link[] $links */
             $links = $projectOwner->getLinks();
+
             foreach ($links as $link){
                 //si usuario tiene un vinculo con el projecto y es ADMIN del mismo.
+
+                $project = $this->projectRepository->findById($projectId);
+
+                //con esto me aseguro que sea un proyecto.
+
+                if($project == null){
+                    throw new Exception("Ocurrio un error al buscar usuarios");
+                }
+
                 if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
-                    $project = $link->getCreatable(); //obtengo proyecto.
 
                     $newLink = new Link(null, new \DateTimeImmutable(), $role, $project, $userInvited);
-
                     $this->linkRepository->save($newLink);
                     $this->userRepository->save($userInvited);
+
                 }
             }
 
