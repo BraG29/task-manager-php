@@ -11,6 +11,7 @@ use App\Domain\Repositories\TaskRepository;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
+use Doctrine\ORM\Exception\ORMException;
 use Exception;
 use App\Domain\Entities\Enums\State;
 use DateTimeImmutable;
@@ -26,7 +27,11 @@ class TaskControllerImpl implements TaskController{
 
     //------------------------------------------------------------------------------------------
     //hay que añadir los repositorios a inyectar al parametro del constructor
-    public function __construct(TaskRepository $taskRepository, ProjectRepository $projectRepository, LinkRepository $linkRepository, UserRepository $userRepository){
+    public function __construct(TaskRepository $taskRepository,
+                                                ProjectRepository $projectRepository,
+                                                LinkRepository $linkRepository,
+                                                UserRepository $userRepository){
+
         $this->taskRepository = $taskRepository;
         $this->projectRepository = $projectRepository;
         $this->linkRepository = $linkRepository;
@@ -53,83 +58,95 @@ class TaskControllerImpl implements TaskController{
     //TODO: finish this function, getting the id from the user through the project ID connected to the task
     public function getTaskById(int $taskId): ?TaskDTO
     {
+        //we search the task for the ID it has
         $task = $this->taskRepository->findById($taskId);
         return new TaskDTO($task->getId(),
                                         $task->getTitle(),
                                         $task->getDescription(),
-                                        $task->getLinks(),
+                                        null,
                                         $task->getProject()->getId(),
                                         $task->getTaskState(),
                                         $task->getLimitDate(),
                                         null);
     }
 
-    //BE AWARE as this function needs to give back an int to check
-    //the exceptions it might generate
-    //I gotta see if THIS is where I check for the project's existence
-    //TESTED uwu
-    //TODO: I have to link the user that created the task: create Link -> and add it to the user
-    //check user has the project that the task belongs to AND it's admin
+
+
+    // TESTED :D
+    //TODO: add a function that lets me add an array of users to a given task
+
+    /**
+     * @throws ORMException
+     * @throws Exception
+     */
     public function createTask(TaskDTO $taskDTO): ?int
     {
         //We find the project that the task belongs to
         $projectTask = $this->projectRepository->findById($taskDTO->getProject());
 
-        //we control that the project is not null
-        if ($projectTask != null) {
+        try { //let's try to create & persist the task
 
-            try { //let's try to create & persist the task
-                $task = new Task(null,
-                    $taskDTO->getTitle(),
-                    $taskDTO->getLimitDate(),
-                    $taskDTO->getDescription(),
-                    $taskDTO->getTaskState(),
-                    $projectTask);
+            //we control that the project is not null
+            if ($projectTask == null) {
+                throw new Exception("No se pudo encontrar el proyecto con ID: " . $taskDTO->getProject() );
+            }
+            //we create the domain object of the Task to add
+            $task = new Task(null,
+                $taskDTO->getTitle(),
+                $taskDTO->getLimitDate(),
+                $taskDTO->getDescription(),
+                $taskDTO->getTaskState(),
+                $projectTask);
 
-                //we try to persist the task
-                $taskID = $this->taskRepository->addTask($task);
-
-                //now we try to find the user that is creating the task
-                $userToCheck = $this->userRepository->findById($taskDTO->getUserID());
-
-                //we iterate through all the Links the task comes with
-                /*
-                foreach ($taskDTO->getLinks() as $link) {
-
-                    //we create the link between task and user
-                    $linkToAdd = new Link(null,
-                                                        new DateTimeImmutable('now'),
-                                                        $link->getRole(),
-                                                        $task,
-                                                        $userToCheck);
-
-                    //we persist the link
-                    $this->linkRepository->save($linkToAdd);
-                }*/
-                $linkToAdd = new Link(null,
-                    new DateTimeImmutable('now'),
-                    RoleType::ADMIN,
-                    $task,
-                    $userToCheck);
-
-                //we persist the link
-                $this->linkRepository->save($linkToAdd);
-
-                return $taskID;
-
-            } catch (Exception $e) {
-
-                echo "No se pudo dar de alta la tarea: " . $taskDTO->getTitle() . " | " . $e->getMessage();
-                return 0;
+            //now we try to find the user that is creating the task
+            $userToCheck = $this->userRepository->findById($taskDTO->getUserID());
+            if ($userToCheck == null) {
+                throw new Exception("No se pudo encontrar el usuario con ID: " . $taskDTO->getUserID());
             }
 
-        }else{
-            throw new Exception("No se pudo encontrar el proyecto con ID: " . $taskDTO->getProject() );
-            return 0;
-        }
+            //I get all the links of that given project so I can check User privileges
+            $userLinks = $userToCheck->getLinks();
 
+            foreach ($userLinks as $link) {
+
+                //if the creatable we find in the user's link is the same as the project one
+                if(  $link->getCreatable()->getId() == $projectTask->getId() ){
+
+                    //check privileges
+                    if ($link->getRole() == RoleType::ADMIN ||  $link->getRole() == RoleType::EDITOR){
+
+                        //create the link domain object
+                        $linkToAdd = new Link(null,
+                            new DateTimeImmutable('now'),
+                            RoleType::ADMIN,
+                            $task,
+                            $userToCheck);
+
+                        //we try to persist the task
+                        $taskID = $this->taskRepository->addTask($task);
+
+                        //we persist the link
+                        $this->linkRepository->save($linkToAdd);
+
+                        return $taskID;
+                    }
+                }
+            }
+            throw new Exception("el usuario: " . $userToCheck->getName() . " no esta autorizado para este proyecto: " . $projectTask->getTitle());
+
+
+        } catch (Exception $e) {
+
+            echo "No se pudo dar de alta la tarea: " . $taskDTO->getTitle();
+            echo "\n";
+            echo "-----------------------------------------------------------------------------------------------------" . "\n";
+            echo "Razón: " . $e->getMessage();
+            throw $e;
+            //return 0;
+        }
     }
 
+    //check the privileges of the user who is deleting the task
     public function updateTask(Task $taskId){
 
         try {

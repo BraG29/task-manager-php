@@ -116,12 +116,15 @@ public function jsonSerialize(): array{
     //I preemptively create an array which will hold all linkDTOs
     $linksDTOArray = array();
 
-    foreach ($links as $currentLink){//for each linkDTO in links
+    if(!empty($links)){
+        foreach ($links as $currentLink){//for each linkDTO in links
 
-        $linkDTO =  LinkDTO::fromArray($currentLink);//create linkDTO object from the data
+            $linkDTO =  LinkDTO::fromArray($currentLink);//create linkDTO object from the data
 
-        $linksDTOArray = array_push($linksDTOArray, $linkDTO);//push it into the array
+            $linksDTOArray = array_push($linksDTOArray, $linkDTO);//push it into the array
+        }
     }
+
 
 
 
