@@ -146,11 +146,8 @@ class UserControllerImpl implements UserController
                 <body>
                     <p>Hola! $receiverName, el usuario: 
                     $senderName te ha invitado a unirte a su proyecto $projectName</p>
-                    <br>
-                    <p>
-                    Haz clic en uno de los siguientes botones, para aceptar o rechazar la invitacion:</p>
-                    <br>
-                  
+                    <p>Haz clic en uno de los siguientes botones, para aceptar o rechazar la invitacion:</p>
+                    
                     <a href='$invitationAccepted'>
                         <button style='padding: 15px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Aceptar invitacion</button>
                     </a>
@@ -173,9 +170,6 @@ class UserControllerImpl implements UserController
             $userInvited = $this->userRepository->findById($userInvitedId);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
-
-
-
             if($userInvited == null || $projectOwner == null){
                 throw new Exception("Ocurrio un error al buscar usuarios");
             }
@@ -184,10 +178,6 @@ class UserControllerImpl implements UserController
                 throw new Exception("El usuario ya se encuentra vinculado al proyecto.");
             }
 
-            /*
-            else{
-                throw new Exception("No hay un proyecto con una tarea.");
-            }*/
 
             /** @var ArrayCollection|Link[] $links */
             $links = $projectOwner->getLinks();
@@ -200,7 +190,7 @@ class UserControllerImpl implements UserController
                 //con esto me aseguro que sea un proyecto.
 
                 if($project == null){
-                    throw new Exception("Ocurrio un error al buscar usuarios");
+                    throw new Exception("No se encontro un proyecto con ese id.");
                 }
 
                 if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
@@ -318,20 +308,25 @@ class UserControllerImpl implements UserController
     }
 
     public function updateUser(UserDTO $userDTO) : int{
+        try{
 
-        $user = $this->userRepository->findById($userDTO->getId());
+            $user = $this->userRepository->findById($userDTO->getId());
 
-        if($user == null){
-            throw new Exception ("No se pudo encontrar el usuario");
+            if($user == null){
+                throw new Exception ("No se pudo encontrar el usuario");
+            }
+
+            $user->setName($userDTO->getName());
+            $user->setLastName($userDTO->getLastName());
+            $user->setPassword($userDTO->getPassword());
+
+            $this->userRepository->save($user);
+            return $user->getId();
+
+        }catch(Exception $e){
+            throw $e;
         }
-
-        $user->setName($userDTO->getName());
-        $user->setLastName($userDTO->getLastName());
-        $user->setEmail($userDTO->getEmail());
-        $user->setPassword($userDTO->getPassword());
-
-        $this->userRepository->save($user);
-
-        return $user->getId();
     }
+
+
 }
