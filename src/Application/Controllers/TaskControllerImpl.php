@@ -48,14 +48,54 @@ class TaskControllerImpl implements TaskController{
     }
 
     //NOT TESTED
+
+    /**
+     * @throws Exception
+     */
     public function getTasksByProject(int $projectId): array
     {
-        return $this->taskRepository->findTasksByProject($projectId);
+        try {
+            //we call the repository to get the tasks for a given project ID
+            $tasks = $this->taskRepository->findTasksByProject($projectId);
+
+            if($tasks == null){
+                //throw Exception if we don't find any
+                throw new Exception("No hay tareas para este proyecto con ID: " . $projectId);
+            }
+
+            //the array we will fill with the jsons of the taskDTOs of the task we found
+            $tasksDTO = [];
+
+            foreach ($tasks as $task){//for each task I got
+
+                //I make the link array so the taskDTO constructor doesn't die
+                $links = $task->getLinks()->toArray();
+
+                //we create the taskDTO from the task data
+                $taskDTO = new TaskDTO($task->getId(),
+                    $task->getTitle(),
+                    $task->getDescription(),
+                    $links,
+                    $task->getProject()->getId(),
+                    $task->getTaskState(),
+                    $task->getLimitDate(),
+                    null);
+
+
+                //we fill the array with the json form of the taskDTO we got from the task
+                $tasksDTO[] = $taskDTO->jsonSerialize();
+            }
+
+            return $tasksDTO;
+
+        }catch(Exception $e){
+            throw $e;
+        }
     }
 
 
     //TESTED UWU
-    //TODO: properly add the user's creator ID into the task I am returning
+    //TODO: properly add the user's creator ID into the task I am returning -> LUCAS SAID NO
     //TODO: Ask los pibes how to get the array of links for said task within this function
     /**
      * @throws Exception
@@ -65,13 +105,15 @@ class TaskControllerImpl implements TaskController{
         //we search the task for the ID it has
         $task = $this->taskRepository->findById($taskId);
 
+        //we control that the task we get is not null
         if ($task == null){
             throw new Exception("No se pudo encontrar una tarea con ID: " . $taskId);
         }
 
+        //we form the arrays of the links so that the TaskDTO constructor doesn't die
         $links = $task->getLinks()->toArray();
 
-        //we control that the task we get is not null
+        //we create the taskDTO from the task data
         return new TaskDTO($task->getId(),
         $task->getTitle(),
         $task->getDescription(),
