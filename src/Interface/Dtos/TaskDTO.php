@@ -12,7 +12,7 @@ class TaskDTO extends CreatableDTO{
     private DateTimeImmutable $limitDate;
     private State $taskState;
     private int $project;
-    private int $userID;
+    private ?int $userID;
 
     /**
      * @param int $id
@@ -31,7 +31,7 @@ class TaskDTO extends CreatableDTO{
                                                 int $project,
                                                 State $taskState,
                                                 DateTimeImmutable $limitDate,
-                                                int $userID){
+                                                ?int $userID){
 
         parent::__construct($id,  $title,  $description,  $links);
         $this->project = $project;
@@ -97,7 +97,8 @@ public function jsonSerialize(): array{
             'links' => $this->links,
             'project' => $this->project,
             'limitDate' => $this->limitDate,
-            'taskState' => $this->taskState
+            'taskState' => $this->taskState,
+            'userID' => $this->userID
 
         ];
 }
@@ -138,7 +139,7 @@ public function jsonSerialize(): array{
             $data['project'],
             $taskState,
             $DataTime,
-            $data['userID']);
+            $data['userID'] ?? null);
     }
 
     /**
