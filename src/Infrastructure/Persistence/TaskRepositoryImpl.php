@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use App\Interface\Dtos\TaskDTO;
+use Exception;
 
 class TaskRepositoryImpl implements TaskRepository{
     private EntityManager $entityManager;
@@ -57,10 +58,11 @@ class TaskRepositoryImpl implements TaskRepository{
      * <p>Finds a task given the ID</p>
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws Exception
      */
     public function findById(int $id): ?Task
     {
-        return $this->entityManager->find(Task::class, $id);
+            return $this->entityManager->find(Task::class, $id);
     }
 
 

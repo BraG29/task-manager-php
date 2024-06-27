@@ -53,21 +53,33 @@ class TaskControllerImpl implements TaskController{
         return $this->taskRepository->findTasksByProject($projectId);
     }
 
-    //ask los pibes if it's correct for the TaskDTO to have just projectID instead
-    //of an actual projectDTO
-    //TODO: finish this function, getting the id from the user through the project ID connected to the task
+
+    //TESTED UWU
+    //TODO: properly add the user's creator ID into the task I am returning
+    //TODO: Ask los pibes how to get the array of links for said task within this function
+    /**
+     * @throws Exception
+     */
     public function getTaskById(int $taskId): ?TaskDTO
     {
         //we search the task for the ID it has
         $task = $this->taskRepository->findById($taskId);
+
+        if ($task == null){
+            throw new Exception("No se pudo encontrar una tarea con ID: " . $taskId);
+        }
+
+        $links = $task->getLinks()->toArray();
+
+        //we control that the task we get is not null
         return new TaskDTO($task->getId(),
-                                        $task->getTitle(),
-                                        $task->getDescription(),
-                                        null,
-                                        $task->getProject()->getId(),
-                                        $task->getTaskState(),
-                                        $task->getLimitDate(),
-                                        null);
+        $task->getTitle(),
+        $task->getDescription(),
+        $links,
+        $task->getProject()->getId(),
+        $task->getTaskState(),
+        $task->getLimitDate(),
+        null);
     }
 
 

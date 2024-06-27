@@ -12,13 +12,13 @@ class LinkDTO implements JsonSerializable{
     private DateTimeImmutable $creationDate;
     private RoleType $role;
     private CreatableDTO | null $creatableDTO;
-    private UserDTO $user;
+    private ?UserDTO $user;
 
     public function __construct(?int $id,
                                 DateTimeImmutable $creationDate,
                                 RoleType $role,
                                 CreatableDTO | null $creatableDTO,
-                                UserDTO $user){
+                                ?UserDTO $user){
         $this->id = $id;
         $this->creationDate = $creationDate;
         $this->role = $role;

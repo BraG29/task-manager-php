@@ -36,4 +36,24 @@ return function (App $app, TaskController $taskController) {
 
     });
 
+    //http://localhost:8080/tasks/{id}
+    $app->get("/tasks/{id}", function (Request $request, Response $response, $args) use ($taskController) {
+        $id = $args['id'];
+
+        try {
+
+            $task = $taskController->getTaskById($id);
+
+
+            $response->getBody()->write(json_encode($task->jsonSerialize()));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+
+        }catch (Exception $e){
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
+        }
+    });
+
+
+
 };

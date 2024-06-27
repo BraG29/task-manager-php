@@ -29,7 +29,7 @@ class Task extends Creatable
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     private Project $project;
 
-    //for shody;
+
     /**
      * @param int|null $id
      * @param string $title
