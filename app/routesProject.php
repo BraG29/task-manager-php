@@ -59,7 +59,7 @@ return function (App $app, ProjectController $projectController) {
      */
 
     // this should only edit the Project Information such as name or description
-    $app->put('/UpdateProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
+    $app->put('/EditProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
         $json = $request->getBody();
         $data = json_decode($json, true);
 
@@ -119,33 +119,5 @@ return function (App $app, ProjectController $projectController) {
                 return $response;
             }
     });*/
-
-    //Edit project JSON example
-    /*
-     *
-     {
-        "id" : 1, //replace your project id here
-        "name" : "Example Project",
-        "description" : "Example Description",
-        "state" : "ACTIVE",
-     }
-     *
-     */
-
-    // this should only edit the Project Information such as name or description or state
-    // Addition of Tasks should be handled by the TaskController in theory
-    $app->get('/EditProject',
-        function (Request $request, Response $response, $args) use ($projectController) {
-            $json = $request->getBody();
-            $data = json_decode($json, true);
-            $projectDTO = ProjectDTO::fromArray($data);
-            $projectId = $projectController->editProject($projectDTO);
-            if ($projectId == 0) {
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-            } else {
-                $response->getBody()->write(json_encode("Proyecto editado con id: " . $projectId));
-                return $response;
-            }
-    });
 
 };
