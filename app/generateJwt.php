@@ -13,7 +13,8 @@ return function (UserDTO $userDTO){
         'iat' => time(),
         'exp' => time() + 3600,
         'uid' => $userDTO->getId(),
-        'email' => $userDTO->getEmail(),
+        'name' => $userDTO->getName(),
+        'lastName' => $userDTO->getLastName()
     ];
 
     return JWT::encode($payload, $secretKey, 'HS256');
