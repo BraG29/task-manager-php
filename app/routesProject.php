@@ -34,24 +34,66 @@ return function (App $app, ProjectController $projectController) {
             }
         });
 
-    //Delete project JSON example
-    /*
-    {
-        "projectId" : 1 //replace your project id here
-    }
-    */
-    $app->post('/DeleteProject',
+
+    $app->get('/GetProjectDataByUser/{userId}',
         function (Request $request, Response $response, $args) use ($projectController) {
-            $json = $request->getBody();
-            $data = json_decode($json, true);
-            $projectId = $projectController->deleteProject($data['projectId']);
-            if ($projectId == 0) {
+            $userId = $args['userId'];
+            $project = $projectController->getProjectDataByUser($userId);
+            if ($project == null) {
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
             } else {
-                $response->getBody()->write(json_encode("Proyecto eliminado con id: " . $projectId));
+                $response->getBody()->write(json_encode($project));
                 return $response;
             }
-        });
+        }
+    );
+
+    //Edit project JSON example
+    /*
+     *
+     {
+        "name" : "Example Project",
+        "description" : "Example Description",
+     }
+     *
+     */
+
+    // this should only edit the Project Information such as name or description
+    $app->put('/UpdateProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
+        $json = $request->getBody();
+        $data = json_decode($json, true);
+
+
+        $projectDto = new ProjectDTO(
+            id: $args['projectId'],
+            name: $data['name'],
+            description: $data['description'],
+            state: $data['state'] //idk why its needed but its needed, should do nothing anyway
+        );
+
+        $updatedProjectId = $projectController->editProject($projectDto);
+
+        if ($updatedProjectId == 0) {
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        } else {
+            $response->getBody()->write(json_encode("Project updated with ID: " . $updatedProjectId));
+            return $response;
+        }
+    });
+
+
+    $app->delete('/DeleteProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
+        $projectId = $args['projectId'];
+
+        $deletedProjectId = $projectController->deleteProject($projectId);
+
+        if ($deletedProjectId == 0) {
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        } else {
+            $response->getBody()->write(json_encode("Project deleted with ID: " . $deletedProjectId));
+            return $response;
+        }
+    });
 
     $app->get('/GetProjectData/{projectId}',
         function (Request $request, Response $response, $args) use ($projectController) {
@@ -65,17 +107,6 @@ return function (App $app, ProjectController $projectController) {
             }
     });
 
-    $app->get('/GetProjectDataByUser/{userId}',
-        function (Request $request, Response $response, $args) use ($projectController) {
-            $userId = $args['userId'];
-            $project = $projectController->getProjectDataByUser($userId);
-            if ($project == null) {
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-            } else {
-                $response->getBody()->write(json_encode($project));
-                return $response;
-            }
-    });
 
     //TODO could be implemented if needed
     /*$app->get('/GetAllProjects',
@@ -100,6 +131,9 @@ return function (App $app, ProjectController $projectController) {
      }
      *
      */
+
+    // this should only edit the Project Information such as name or description or state
+    // Addition of Tasks should be handled by the TaskController in theory
     $app->get('/EditProject',
         function (Request $request, Response $response, $args) use ($projectController) {
             $json = $request->getBody();

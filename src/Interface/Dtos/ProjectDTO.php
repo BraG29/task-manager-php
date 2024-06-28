@@ -10,12 +10,12 @@ class ProjectDTO implements JsonSerializable{
     private ?int $id;
     private string $name;
     private string $description;
-    private bool $available;
+    private ?bool $available;
     private ?array $users;
     private ?array $tasks;
 
 
-    public function __construct(?int $id, string $name, string $description, bool $state, ?array $users  = [], ?array $tasks = []) {
+    public function __construct(?int $id, string $name, string $description, ?bool $state, ?array $users  = [], ?array $tasks = []) {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
@@ -107,5 +107,10 @@ class ProjectDTO implements JsonSerializable{
             'userList' => $this->users,
             'taskList' => $this->tasks
         ];
+    }
+
+    public function setId(mixed $projectId): void
+    {
+        $this->id = $projectId;
     }
 }

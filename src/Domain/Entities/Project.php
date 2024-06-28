@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class Project extends Creatable {
 
-    #[ORM\Column(type: 'string',)]
+    #[ORM\Column(type: 'string')]
     private bool $available;
 
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project',cascade: ['remove'], orphanRemoval: true)]

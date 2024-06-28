@@ -8,6 +8,7 @@ use App\Domain\Entities\Project;
 use App\Domain\Repositories\LinkRepository;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\Dtos\LinkDTO;
+use App\Interface\Dtos\TaskDTO;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\ProjectController;
 use App\Domain\Repositories\ProjectRepository;
@@ -36,14 +37,48 @@ class ProjectControllerImpl implements ProjectController {
         $project = $this->projectRepository->findById($projectId);
 
         if (!$project) {
+            echo('Project not found');
             throw new Exception('Project not found');
         }
 
         $links = $project->getLinks();
+        $LinksDTOArray = [];
 
-        $arraylinks = [];
         foreach ($links as $link) {
-            $arraylinks[] = $link->toArray();
+            $LinksDTOArray[] = new LinkDTO(
+                id: $link->getId(),
+                creationDate: $link->getLinkDate(),
+                role: $link->getRole(),
+                creatableDTO: null,
+                user: new UserDTO($link->getUser())
+            );
+        }
+
+        $TasksDTOArray = [];
+
+        foreach ($project->getTasks() as $task) {
+
+            $LinksDTOArrayForTask = [];
+
+            foreach ($task->getLinks() as $link) {
+                $LinksDTOArrayForTask[] = new LinkDTO(
+                    id: $link->getId(),
+                    creationDate: $link->getCreationDate(),
+                    role: $link->getRole(),
+                    creatableDTO: null,
+                    user: new UserDTO($link->getUser())
+                );
+            }
+            $TasksDTOArray[] = new TaskDTO(
+                id: $task->getId(),
+                title: $task->getTitle(),
+                description: $task->getDescription(),
+                links: $LinksDTOArrayForTask,
+                project: $task->getProject(),
+                taskState: $task->isAvailable(),
+                limitDate: $task->getLimitDate(),
+                userID: $task->getUserId()
+            );
         }
 
         $projectDTOClass = ProjectDTO::class;
@@ -52,39 +87,80 @@ class ProjectControllerImpl implements ProjectController {
             name: $project->getTitle(),
             description: $project->getDescription(),
             state: $project->isAvailable(),
-            users: $arraylinks,
-            tasks: $project->getTasks()
+            users: $LinksDTOArray,
+            tasks: $TasksDTOArray
         );
-
     }
 
     /**
      * @param int $userId
      * @return array|null
+     * @throws Exception
      */
     public function getProjectDataByUser(int $userId): ?array
     {
-        $this->userRepository->findById($userId);
 
         $user = $this->userRepository->findById($userId);
+
+        if (!$user) {
+            echo('User not found');
+            throw new Exception('User not found');
+        }
+
         $linkSet = $user->getLinks();
 
-        $arraylinks = [];
+        $linkDTOArray = [];
         $projectDTOArray = [];
+
         foreach ($linkSet as $link) {
-            $arraylinks[] = $link->toArray();
+            $linkDTOArray[] = new LinkDTO(
+                id: $link->getId(),
+                creationDate: $link->getLinkDate(),
+                role: $link->getRole(),
+                creatableDTO: null,
+                user: new UserDTO($link->getUser())
+            );
         }
-        foreach ($arraylinks as $link) {
-            if($link->getCreatable() instanceof Project){
+        foreach ($linkSet as $link) {
+            if ($link->getCreatable() instanceof Project) {
+
+                $TasksDTOArray = [];
+                $linksDTOArrayForTask = [];
+
+                foreach ($link->getCreatable()->getTasks() as $task) {
+                    foreach ($task->getLinks() as $link) {
+
+                        $linksDTOArrayForTask[] = new LinkDTO(
+                            id: $link->getId(),
+                            creationDate: $link->getCreationDate(),
+                            role: $link->getRole(),
+                            creatableDTO: null,
+                            user: new UserDTO($link->getUser())
+                        );
+                    }
+
+                    $TasksDTOArray[] = new TaskDTO(
+                        id: $task->getId(),
+                        title: $task->getTitle(),
+                        description: $task->getDescription(),
+                        links: $linksDTOArrayForTask,
+                        project: $task->getProject(),
+                        taskState: $task->isAvailable(),
+                        limitDate: $task->getLimitDate(),
+                        userID: $task->getUserId()
+                    );
+                }
+
                 $project = $link->getCreatable();
                 $projectDTOArray[] = new ProjectDTO(
                     id: $project->getId(),
                     name: $project->getTitle(),
                     description: $project->getDescription(),
                     state: $project->isAvailable(),
-                    users: $arraylinks,
-                    tasks: $project->getTasks()
+                    users: $linkDTOArray,
+                    tasks: $TasksDTOArray
                 );
+
             }
         }
         return $projectDTOArray;
@@ -126,21 +202,14 @@ class ProjectControllerImpl implements ProjectController {
 
     public function editProject(ProjectDTO $projectDTO): ?int
     {
-        if ($projectDTO->getId() !== $this->projectRepository->findById($projectDTO->getId())) {
+        if ($this->projectRepository->findById($projectDTO->getId()) === null) {
+            echo("Project not found");
             return 0;
         }
 
-        $project = new Project(
-            id: $projectDTO->getId(),
-            name: $projectDTO->getName(),
-            description: $projectDTO->getDescription(),
-            links: $projectDTO->getUsers(),
-            state: $projectDTO->isAvailable(),
-        );
-
-        foreach ($projectDTO->getTasks() as $task) {
-            $project->addTask($task);
-        }
+        $project = $this->projectRepository->findById($projectDTO->getId());
+        $project->setTitle($projectDTO->getName());
+        $project->setDescription($projectDTO->getDescription());
 
         return $this->projectRepository->editProject($project);
     }
