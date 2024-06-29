@@ -15,13 +15,13 @@ class Project extends Creatable {
     #[ORM\Column(type: 'string')]
     private bool $available;
 
-    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project')]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project',cascade: ['remove'], orphanRemoval: true)]
     private Collection $tasks;
 
-    public function __construct(int    $id,
+    public function __construct(?int    $id,
                                 string $name,
                                 string $description,
-                                array  $links,
+                                ?array  $links,
                                 bool   $state)
     {
         parent::__construct($id, $name, $description, $links);
@@ -57,5 +57,6 @@ class Project extends Creatable {
     {
         $this->tasks = $tasks;
     }
+
 
 }

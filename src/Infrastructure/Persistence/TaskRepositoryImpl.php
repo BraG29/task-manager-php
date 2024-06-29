@@ -48,9 +48,19 @@ class TaskRepositoryImpl implements TaskRepository{
         return $task->getId();
     }
 
-    public function deleteTask(Task $task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function deleteTask(Task $task): void
     {
-        // TODO: Implement deleteTask() method.
+        try {
+            $this->entityManager->remove($task);
+            $this->entityManager->flush();
+        }catch(Exception $e){
+            throw new Exception("Error al borrar la tarea con ID: ".$task->getId());
+        }
     }
 
 

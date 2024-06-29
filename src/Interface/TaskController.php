@@ -17,5 +17,5 @@ interface TaskController{
 
     public function updateTask(Task $taskId);
 
-    public function deleteTask(int $taskId);
+    public function deleteTask(int $taskId, int $userId);
 }

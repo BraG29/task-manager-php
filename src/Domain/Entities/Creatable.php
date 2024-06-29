@@ -20,7 +20,7 @@ abstract class Creatable
     protected string $title;
     #[ORM\Column(type: 'string')]
     protected string $description;
-    #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'creatable')]
+    #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'creatable', cascade: ['remove'], orphanRemoval: true)]
     protected Collection $links;
 
     /**

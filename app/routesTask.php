@@ -27,7 +27,7 @@ return function (App $app, TaskController $taskController) {
 
             $taskId = $taskController->createTask($taskDTO);
             $response->getBody()->write(json_encode(["message"=>"Tarea creada con id: " . $taskId]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
 
         }catch(Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
@@ -50,7 +50,7 @@ return function (App $app, TaskController $taskController) {
 
         }catch (Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         }
     });
 
@@ -67,8 +67,45 @@ return function (App $app, TaskController $taskController) {
         }catch (Exception $e){
 
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         }
     });
 
+
+    //http://localhost:8080/tasksByUser/{id}
+    $app->get("/tasksByUser/{id}", function (Request $request, Response $response, $args) use ($taskController) {
+
+        $userId = $args['id'];
+        $json = $request->getBody();
+        $data = json_decode($json, true);
+
+        try {
+            $tasks = $taskController->getTasksByUser($userId);
+            $response->getBody()->write(json_encode($tasks));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+
+        }catch (Exception $e){
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+
+        }
+    });
+
+
+    //http://localhost:8080/tasks/delete
+    $app->delete("/tasks/delete", function (Request $request, Response $response, $args) use ($taskController) {
+        $json = $request->getBody();
+        $data = json_decode($json, true);
+
+        try {
+            $taskController->deleteTask($data['taskId'], $data['userId']);
+
+            $response->getBody()->write(json_encode(["message"=>"Tarea eliminada con id: " . $data['taskId']]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+
+        }catch (Exception $e){
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+    });
 };
