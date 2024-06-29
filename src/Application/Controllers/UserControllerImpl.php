@@ -195,7 +195,7 @@ class UserControllerImpl implements UserController
 
                 if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
 
-                    if($role = RoleType::ADMIN){
+                    if($role == RoleType::ADMIN){
                         throw new Exception("No puedas dar rol de administrador");
                     }
 
