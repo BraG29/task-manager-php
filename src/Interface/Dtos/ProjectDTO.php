@@ -7,15 +7,15 @@ use JsonSerializable;
 
 class ProjectDTO implements JsonSerializable{
 
-    private int $id;
+    private ?int $id;
     private string $name;
     private string $description;
-    private bool $available;
-    private array $users;
-    private array $tasks;
+    private ?bool $available;
+    private ?array $users;
+    private ?array $tasks;
 
 
-    public function __construct(int $id, string $name, string $description, bool $state, array $users  = [], array $tasks = []) {
+    public function __construct(?int $id, string $name, string $description, ?bool $state, ?array $users  = [], ?array $tasks = []) {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
@@ -24,7 +24,22 @@ class ProjectDTO implements JsonSerializable{
         $this->tasks = $tasks;
     }
 
-    public function getId(): int
+    public static function fromArray(object|array|null $data): ?ProjectDTO
+    {
+        if ($data === null) {
+            return null;
+        }
+        return new ProjectDTO(
+            $data['id'],
+            $data['name'],
+            $data['description'],
+            $data['state'],
+            $data['userList'],
+            $data['taskList']
+        );
+    }
+
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -44,12 +59,39 @@ class ProjectDTO implements JsonSerializable{
         return $this->available;
     }
 
-    public function getUsers(): array
+    public function getUsers(): ?array
     {
         return $this->users;
     }
+    public function getUserById(int $userId): ?array
+    {
+        foreach ($this->users as $user) {
+            if ($user['id'] === $userId) {
+                return $user;
+            }
+            else {
+                return null;
+            }
+        }
+        return null;
+    }
+    public function getTaskById(int $taskId): ?array{
 
-    public function getTasks(): array
+        foreach ($this->tasks as $task) {
+            if ($task['id'] === $taskId) {
+                return $task;
+            }
+            else {
+                return null;
+            }
+        }
+        return null;
+    }
+    public function getFirstUserId(): ?int{
+        return $this->users[0]['id'];
+    }
+
+    public function getTasks(): ?array
     {
         return $this->tasks;
     }
@@ -65,5 +107,10 @@ class ProjectDTO implements JsonSerializable{
             'userList' => $this->users,
             'taskList' => $this->tasks
         ];
+    }
+
+    public function setId(mixed $projectId): void
+    {
+        $this->id = $projectId;
     }
 }
