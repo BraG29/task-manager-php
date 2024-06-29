@@ -44,11 +44,26 @@ class TaskControllerImpl implements TaskController{
         //and compare against the task ones, isn't it?
         //$this->repository->
         // TODO: Implement getTasksByUser() method.
+
+
+        try {
+            $userToSearch = $this->userRepository->findById($userId);
+
+            if ($userToSearch == null){
+                throw new Exception("No se pudo encontrar el usuario con ID: " . $userId . " para revisar sus tareas");
+            }
+
+
+        }catch (Exception $e){
+            throw $e;
+        }
+
+
+
         return null ;
     }
 
-    //NOT TESTED
-
+    //TESTED UWU
     /**
      * @throws Exception
      */

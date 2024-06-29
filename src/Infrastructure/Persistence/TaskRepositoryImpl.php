@@ -76,4 +76,10 @@ class TaskRepositoryImpl implements TaskRepository{
         return $this->repository->findBy(array('project' => $projectId));
     }
 
+
+    public function findTasksByUser($userId): ?array{
+
+        $this->findTasksByUser();
+        return $this->repository->findBy(array('project' => $userId));
+    }
 }
