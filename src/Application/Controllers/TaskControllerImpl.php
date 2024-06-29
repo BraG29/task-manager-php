@@ -11,7 +11,9 @@ use App\Domain\Repositories\TaskRepository;
 use App\Domain\Repositories\UserRepository;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use App\Domain\Entities\Enums\State;
 use DateTimeImmutable;
@@ -38,15 +40,15 @@ class TaskControllerImpl implements TaskController{
         $this->userRepository = $userRepository;
     }
 
+    //TESTED uwu
+
+    /**
+     * @throws Exception
+     */
     public function getTasksByUser(int $userId): ?array
     {
-        //esta era la zarpada function where I had to get the user's projects
-        //and compare against the task ones, isn't it?
-        //$this->repository->
-        // TODO: Implement getTasksByUser() method.
-
-
         try {
+            //we search for the user we want to get the tasks from
             $userToSearch = $this->userRepository->findById($userId);
 
             if ($userToSearch == null){
@@ -54,13 +56,51 @@ class TaskControllerImpl implements TaskController{
             }
 
 
+
+            //we get the links from the user
+            /** @var ArrayCollection|Link[] $links */
+            $userLinks = $userToSearch->getLinks();
+
+            //if (empty($userLinksCheck)){
+            if (count($userLinks) < 2) {
+                throw new Exception(" el usuario: " . $userToSearch->getName() . " no tiene ninguna tarea asignada");
+            }
+
+            //we prepare the array that we will be returning with the TaskDTOs
+            $tasksDTO = [];
+
+            //we iterate to get all the links that are tasks
+            foreach ($userLinks as $link){
+
+                //I get the creatable from the link
+                $linkCreatable = $link->getCreatable();
+
+                //if the creatable is a Task
+                if ( $linkCreatable instanceof Task){
+
+                    //I make the link array so the taskDTO constructor doesn't die
+                    $linksFromTask = $linkCreatable->getLinks()->toArray();
+
+                    //we create the taskDTO from the task data
+                    $taskDTO = new TaskDTO($linkCreatable->getId(),
+                        $linkCreatable->getTitle(),
+                        $linkCreatable->getDescription(),
+                        $linksFromTask,
+                        $linkCreatable->getProject()->getId(),
+                        $linkCreatable->getTaskState(),
+                        $linkCreatable->getLimitDate(),
+                        null);
+
+
+                    //we fill the array with the json form of the taskDTO we got from the task
+                    $tasksDTO[] = $taskDTO->jsonSerialize();
+                }
+            }
+            return $tasksDTO;
+
         }catch (Exception $e){
-            throw $e;
+            throw new Exception($e->getMessage());
         }
-
-
-
-        return null ;
     }
 
     //TESTED UWU
@@ -141,7 +181,7 @@ class TaskControllerImpl implements TaskController{
 
 
 
-    // TESTED :D
+    // TESTED UWU
     //TODO: add a function that lets me add an array of users to a given task
 
     /**
@@ -169,6 +209,7 @@ class TaskControllerImpl implements TaskController{
 
             //now we try to find the user that is creating the task
             $userToCheck = $this->userRepository->findById($taskDTO->getUserID());
+
             if ($userToCheck == null) {
                 throw new Exception("No se pudo encontrar el usuario con ID: " . $taskDTO->getUserID());
             }
@@ -226,8 +267,58 @@ class TaskControllerImpl implements TaskController{
 
     }
 
-    public function deleteTask(int $taskId)
-    {
-        // TODO: Implement deleteTask() method.
+
+
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function deleteTask(int $taskId, int $userId){
+
+        try {
+            //we find the user that wants to delete the task
+            $userToCheck = $this->userRepository->findById($userId);
+
+            if ($userToCheck == null) {
+                throw new Exception("No se pudo encontrar el usuario con ID: " . $userId);
+            }
+
+            //we find the task we will be deleting
+            $taskToDelete = $this->taskRepository->findById($taskId);
+
+            if ($taskToDelete == null) {
+                throw new Exception("No se pudo encontrar la tarea con ID: " . $taskId);
+            }
+
+            //I get all the links of the user
+            $userLinks = $userToCheck->getLinks();
+
+
+
+            foreach ($userLinks as $link) {
+
+                //if the creatable of the user we find is the same as the task's ID
+                if(  $link->getCreatable()->getId() == $taskToDelete->getId() ){
+
+                    //check privileges
+                    if ($link->getRole() == RoleType::ADMIN){
+
+                        //we DELETE the task
+                        $this->taskRepository->deleteTask($taskToDelete);
+                        return;
+                    }
+                    else{
+                        throw new Exception("No se tienen los permisos correspondientes para eliminar la tarea con ID: " . $taskToDelete->getId());
+                    }
+                }
+            }
+
+            throw new Exception("No se encontró el vinculo de la tarea con ID: " . $taskId . " para el usuario con ID: " . $userToCheck->getId());
+
+        }catch (Exception $e){
+            throw new Exception($e->getMessage());
+        }
     }
 }

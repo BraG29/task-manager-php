@@ -6,7 +6,7 @@ namespace App\Domain\Entities\Enums;
  * Tipo de Roles y posibles asignaciones
  * <ul>
  *     <li>
- *         <code>ADMIN:</code> Quien crea el Proytecto o la Tarea.<br>
+ *         <code>ADMIN:</code> Quien crea el Proyecto o la Tarea.<br>
  *         Se puede asignar entre vinculo de Usuario con Proyecto y Tarea<br>
  *         <b>El usuario que crea la Tarea es tambien responsable de ella de manera irreversible</b>
  *     </li>
