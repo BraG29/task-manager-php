@@ -105,10 +105,10 @@ class UserDTO implements JsonSerializable
                 $data['id'] ?? null,
                 $data['name'],
                 $data['lastName'],
-                $data['email'],
+                $data['email'] ?? '',
                 $data['password'],
                 new ArrayCollection(),
-                $data['verified']
+                $data['verified'] ?? ''
             )
         );
     }
