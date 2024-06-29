@@ -195,6 +195,10 @@ class UserControllerImpl implements UserController
 
                 if($link->getCreatable()->getId() == $projectId &&  $link->getRole() == RoleType::ADMIN){
 
+                    if($role = RoleType::ADMIN){
+                        throw new Exception("No puedas dar rol de administrador");
+                    }
+
                     $newLink = new Link(null, new \DateTimeImmutable(), $role, $project, $userInvited);
                     $this->linkRepository->save($newLink);
                     $this->userRepository->save($userInvited);
