@@ -75,14 +75,20 @@ return function (App $app, UserController $userController) {
         $data = json_decode($json, true);
         $userDto = UserDTO::fromArray($data);
 
-        $userId = $userController->registerUser($userDto);
+        try{
+            $userId = $userController->registerUser($userDto);
 
-        if($userId == 0){
+            if($userId == 0){
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+
+            }else{
+                $response->getBody()->write(json_encode("Usuario creado con id: " . $userId));
+                return $response;
+            }
+        }catch (Exception $e){
+            $errorData = ['error' => $e->getMessage()];
+            $response->getBody()->write(json_encode($errorData));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-
-        }else{
-            $response->getBody()->write(json_encode("Usuario creado con id: " . $userId));
-            return $response;
         }
     });
 
@@ -91,15 +97,19 @@ return function (App $app, UserController $userController) {
         //parametros en el link.
         $params = $request->getQueryParams();
         $id = $params['userId'];
-
         $verification = $userController->verifyEmail($id);
 
         if($verification){
-            $response->getBody()->write(json_encode("Correo verificado con exito."));
-            return $response;
+
+            $url = "http://192.168.1.15:4200/login";
+            $sleep = 5000;
+            $htmlPage = file_get_contents(__DIR__ . '/../public/pages/loginRedirect.html');
+            $html = str_replace(['{url}', '{sleep}'], [$url, $sleep], $htmlPage);
+            $response->getBody()->write($html);
+
+            return $response->withHeader('Content-Type', 'text/html');
         }else{
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-
         }
     });
 

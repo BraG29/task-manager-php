@@ -225,6 +225,9 @@ class UserControllerImpl implements UserController
 
     public function registerUser(UserDTO $userDTO): int
     {
+        if($this->userRepository->findByEmail($userDTO->getEmail()) != null){
+            throw new Exception("El correo se encuentra en uso");
+        }
 
         $user = new User(
             $userDTO->getId(),
@@ -245,29 +248,16 @@ class UserControllerImpl implements UserController
             $userId = $user->getId();
 
             $verificationLink = "http://192.168.1.15:8080/verifyEmail?userId=".$userId;
-
-            $message = "
-                <html>
-                <body>
-                    <p>Hola! $name bienvenido a nuestra plataforma.</p>
-                    <br>
-                    <p>Para poder iniciar sesion primero debes verificar tu correo. <br>
-                    Haz clic en el siguiente boton para verificar tu correo electronico:</p>
-                    <br>
-                    <a href='$verificationLink'>
-                        <button style='padding: 10px 20px; color: white; background-color: blue; border: none; border-radius: 5px;'>Verificar correo</button>
-                    </a>
-                </body>
-                </html>
-            ";
-
+            $htmlPage = file_get_contents(__DIR__ . '/../../../public/pages/verificationEmail.html');
+            $html = str_replace(['{name}', '{verificationLink}'], [$name, $verificationLink], $htmlPage);
             $sendMail = require __DIR__ . '/../../../app/sendEmail.php';
-            $sendMail($receiver, $subject, $message);
+            $sendMail($receiver, $subject, $html);
+
             return $user->getId();
 
         } catch (Exception $e) {
             echo "Error persistiendo: " . $e->getMessage();
-            return 0;
+            throw $e;
         }
     }
 

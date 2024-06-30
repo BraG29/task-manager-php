@@ -38,7 +38,7 @@ class Link
     #[ORM\GeneratedValue]
     private ?int $id;
     #[ORM\Column(name: 'link_date', type: 'datetime_immutable')]
-    private DateTimeImmutable $linkDate; //TODO: cambiar nombre de la variable
+    private DateTimeImmutable $linkDate;
     #[ORM\Column(enumType: RoleType::class)]
     private RoleType $role;
     #[ORM\ManyToOne(targetEntity: Creatable::class, inversedBy: 'links')]
