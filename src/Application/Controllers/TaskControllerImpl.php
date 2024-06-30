@@ -164,19 +164,33 @@ class TaskControllerImpl implements TaskController{
         if ($task == null){
             throw new Exception("No se pudo encontrar una tarea con ID: " . $taskId);
         }
-
+        //TODO:Hay que hacer que las tareas vengan con los IDs de los usuarios editores, osease el ID del que la creo *más* el admin del proyecto
         //we form the arrays of the links so that the TaskDTO constructor doesn't die
-        $links = $task->getLinks()->toArray();
+        //$links = $task->getLinks()->toArray();
+
+        $links = $task->getLinks();
+
+        $userIDs = [];
+
+        foreach ($links as $link) {
+
+            $linkUser = $link->getUser();
+
+            //check privileges
+            if ($link->getRole() == RoleType::ADMIN || $link->getRole() == RoleType::EDITOR) {
+                $userIDs[] = $linkUser->getId();
+            }
+        }
 
         //we create the taskDTO from the task data
         return new TaskDTO($task->getId(),
         $task->getTitle(),
         $task->getDescription(),
-        $links,
+        $links->toArray(), //this is NOT gonna work lmao. . .
         $task->getProject()->getId(),
         $task->getTaskState(),
         $task->getLimitDate(),
-        null);
+        $userIDs);
     }
 
 
@@ -256,6 +270,9 @@ class TaskControllerImpl implements TaskController{
         }
     }
 
+    //TODO: EN QUE MOMENTO DE INCONSCIENCIA COLECTIVA
+    //TODO: SE ME DIO POR RECIBIR UN OBJETO DE DOMINIO DESDE EL ENDPOINT?!?!?!?!?!?!?!?
+    //TODO: APARTE EL NOMBRE ESTÁ RE ROTO AMIGO NOOOOO
     //check the privileges of the user who is deleting the task
     public function updateTask(Task $taskId){
 

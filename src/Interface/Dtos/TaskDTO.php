@@ -12,7 +12,7 @@ class TaskDTO extends CreatableDTO{
     private DateTimeImmutable $limitDate;
     private State $taskState;
     private int $project;
-    private ?int $userID;
+    private int | array $userID;
 
     /**
      * @param int $id
@@ -31,7 +31,7 @@ class TaskDTO extends CreatableDTO{
                                                 int $project,
                                                 State $taskState,
                                                 DateTimeImmutable $limitDate,
-                                                ?int $userID){
+                                                int | array $userID){
 
         parent::__construct($id,  $title,  $description,  $links);
         $this->project = $project;
