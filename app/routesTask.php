@@ -50,7 +50,7 @@ return function (App $app, TaskController $taskController) {
 
         }catch (Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
         }
     });
 
@@ -67,7 +67,7 @@ return function (App $app, TaskController $taskController) {
         }catch (Exception $e){
 
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
         }
     });
 
@@ -86,7 +86,7 @@ return function (App $app, TaskController $taskController) {
 
         }catch (Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
 
         }
     });
@@ -105,7 +105,7 @@ return function (App $app, TaskController $taskController) {
 
         }catch (Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
         }
     });
 };
