@@ -5,10 +5,12 @@ namespace App\Application\Controllers;
 use App\Domain\Entities\Enums\RoleType;
 use App\Domain\Entities\Link;
 use App\Domain\Entities\Task;
+use App\Domain\Entities\User;
 use App\Domain\Repositories\LinkRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\TaskRepository;
 use App\Domain\Repositories\UserRepository;
+use App\Interface\Dtos\LinkDTO;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
@@ -52,69 +54,48 @@ class TaskControllerImpl implements TaskController{
             //we search for the user we want to get the tasks from
             $userToSearch = $this->userRepository->findById($userId);
 
-            if ($userToSearch == null){
+            if ($userToSearch == null) {
                 throw new Exception("No se pudo encontrar el usuario con ID: " . $userId . " para revisar sus tareas");
             }
 
-
-
             //we get the links from the user
-            /** @var ArrayCollection|Link[] $links */
-            $userLinks = $userToSearch->getLinks();
+            $userTasks = $userToSearch->getTasks();
 
             //if (empty($userLinksCheck)){
-            if (count($userLinks) < 2) {
+            if (count($userTasks) < 1) {
                 throw new Exception(" el usuario: " . $userToSearch->getName() . " no tiene ninguna tarea asignada");
             }
 
+
+
             //we prepare the array that we will be returning with the TaskDTOs
+            $linksDTO = [];
             $tasksDTO = [];
 
             //we iterate to get all the links that are tasks
-            foreach ($userLinks as $link){
+            foreach ($userTasks as $taskLink) {
 
-                //I get the creatable from the link
-                $linkCreatable = $link->getCreatable();
-
-                //if the creatable is a Task
-                if ( $linkCreatable instanceof Task){
-
-                    //I make the link array so the taskDTO constructor doesn't die
-                    $linksFromTask = $linkCreatable->getLinks();
-
-                    //we make the array we will fill with the users of the tasks we find
-                    $usersDTO = [];
-
-                    foreach ($linksFromTask as $taskLink){
-                        //we get the User from the link of the task
-                        $userLink = $taskLink->getUser();
-
-                        //we create the userDTO from it
-                        $userDTO = new UserDTO($userLink);
-
-                        //we fill the array with the json form of the taskDTO we got from the task
-                        $usersDTO[] = $userDTO->jsonSerialize();
-
-                    }
+                $linksDTO[] = new LinkDTO(
+                    id: $taskLink->getId(),
+                    creationDate: $taskLink->getLinkDate(),
+                    role: $taskLink->getRole(),
+                    creatableDTO: null,
+                    user: new UserDTO($userToSearch)
+                );
 
 
-                    //we create the taskDTO from the task data
-                    $taskDTO = new TaskDTO($linkCreatable->getId(),
-                        $linkCreatable->getTitle(),
-                        $linkCreatable->getDescription(),
-                        $usersDTO,
-                        $linkCreatable->getProject()->getId(),
-                        $linkCreatable->getTaskState(),
-                        $linkCreatable->getLimitDate(),
-                        null);
-
-
-                    //we fill the array with the json form of the taskDTO we got from the task
-                    $tasksDTO[] = $taskDTO->jsonSerialize();
-                }
+                $task = $taskLink->getCreatable();
+                //we create the taskDTO from the task data
+                $tasksDTO[] = new TaskDTO($task->getId(),
+                    title: $task->getTitle(),
+                    description: $task->getDescription(),
+                    links: $linksDTO,
+                    project: null,
+                    taskState: $task->getTaskState(),
+                    limitDate: $task->getLimitDate(),
+                    userID: null);
             }
             return $tasksDTO;
-
         }catch (Exception $e){
             throw new Exception($e->getMessage());
         }
@@ -356,7 +337,7 @@ class TaskControllerImpl implements TaskController{
                 throw new Exception("No se pudo encontrar el usuario con ID: " . $userId);
             }
             if($this->taskRepository->findById($taskDTO->getId()) == null){
-                throw new Exception("No se pudo encontrar la tarea con ID: " . $taskId);
+                throw new Exception("No se pudo encontrar la tarea con ID: " . $taskDTO->getId());
             }
 
             $task = $this->taskRepository->findById($taskDTO->getId());
@@ -374,11 +355,11 @@ class TaskControllerImpl implements TaskController{
                 }
             }
 
-            throw new Exception("el usuario: " . $userId . " no esta autorizado para editar esta tarea: " . $taskId);
+            throw new Exception("el usuario: " . $userId . " no esta autorizado para editar esta tarea: " . $taskDTO->getId());
 
         }catch (Exception $e){
 
-            echo "No se pudo editar la tarea: " . $taskId;
+            echo "No se pudo editar la tarea: " . $taskDTO->getId();
             echo "\n";
             echo "-----------------------------------------------------------------------------------------------------" . "\n";
             echo "Razón: " . $e->getMessage();
