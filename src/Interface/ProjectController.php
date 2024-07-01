@@ -16,6 +16,6 @@ interface ProjectController
 
     public function editProject(ProjectDTO $projectDTO);
 
-    public function deleteProject(int $projectId);
+    public function deleteProject(int $projectId, int $userId);
 
 }

@@ -63,15 +63,7 @@ return function (App $app, ProjectController $projectController) {
         $json = $request->getBody();
         $data = json_decode($json, true);
 
-
-        $projectDto = new ProjectDTO(
-            id: $args['projectId'],
-            name: $data['name'],
-            description: $data['description'],
-            state: $data['state'] //idk why its needed but its needed, should do nothing anyway
-        );
-
-        $updatedProjectId = $projectController->editProject($projectDto);
+        $updatedProjectId = $projectController->editProject(ProjectDTO::fromArray($data));
 
         if ($updatedProjectId == 0) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
@@ -81,17 +73,16 @@ return function (App $app, ProjectController $projectController) {
         }
     });
 
-
-    $app->delete('/DeleteProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
-        $projectId = $args['projectId'];
-
-        $deletedProjectId = $projectController->deleteProject($projectId);
-
-        if ($deletedProjectId == 0) {
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-        } else {
-            $response->getBody()->write(json_encode("Project deleted with ID: " . $deletedProjectId));
-            return $response;
+    $app->delete('/DeleteProject', function (Request $request, Response $response, $args) use ($projectController) {
+        $json = $request->getBody();
+        $data = json_decode($json, true);
+        try{
+            $projectController->deleteProject($data['projectId'], $data['userId']);
+            $response->getBody()->write(json_encode("Project deleted with ID: " . $data['projectId']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
     });
 
@@ -106,7 +97,6 @@ return function (App $app, ProjectController $projectController) {
                 return $response;
             }
     });
-
 
     //TODO could be implemented if needed
     /*$app->get('/GetAllProjects',

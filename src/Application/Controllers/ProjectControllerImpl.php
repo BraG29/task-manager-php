@@ -15,6 +15,7 @@ use App\Domain\Repositories\ProjectRepository;
 use App\Interface\Dtos\ProjectDTO;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 
 class ProjectControllerImpl implements ProjectController {
@@ -191,12 +192,35 @@ class ProjectControllerImpl implements ProjectController {
 
         return $this->projectRepository->editProject($project);
     }
-
-    public function deleteProject(int $projectId): int
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function deleteProject(int $projectId, int $userId): void
     {
-        if ($this->projectRepository->findById($projectId) === null) {
-            return 0;
+        try {
+            if ($this->projectRepository->findById($projectId) === null) {
+                throw new Exception('Projecto no encontrado');
+            }
+            if ($this->userRepository->findById($userId) === null) {
+                throw new Exception('Usuario no encontrado');
+            }
+
+            $project = $this->projectRepository->findById($projectId);
+
+            foreach ($project->getLinks() as $link) {
+                if ($link->getRole() === RoleType::ADMIN && $link->getUser()->getId() === $userId) {
+                    $this->projectRepository->deleteProject($link->getCreatable()->getId());
+                    return;
+                }
+                else {
+                    throw new Exception('Usuario no autorizado');
+                }
+            }
         }
-        return $this->projectRepository->deleteProject($projectId);
+        catch (Exception $e) {
+            throw new Exception( "No se pudo borrar el Projecto: " . $projectId . " | " . $e->getMessage());
+        }
     }
 }

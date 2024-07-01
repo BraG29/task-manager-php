@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 class ProjectRepositoryImpl implements ProjectRepository{
 
@@ -51,12 +52,19 @@ class ProjectRepositoryImpl implements ProjectRepository{
         return $project->getId();
     }
 
-    public function deleteProject(int $projectId): int
+    /**
+     * @throws Exception
+     */
+    public function deleteProject(int $projectId): void
     {
-        $project = $this->entityManager->find(Project::class, $projectId);
-        $this->entityManager->remove($project);
-        $this->entityManager->flush();
-        return $projectId;
+        try {
+            $project = $this->entityManager->find(Project::class, $projectId);
+            $this->entityManager->remove($project);
+            $this->entityManager->flush();
+        }
+         catch (ORMException $e) {
+            throw new Exception( $e->getMessage());
+        }
     }
 
     /**

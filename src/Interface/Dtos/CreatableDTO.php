@@ -4,10 +4,10 @@ namespace App\Interface\Dtos;
 use JsonSerializable;
 
 abstract class CreatableDTO implements JsonSerializable{
-    protected ?int $id;
+    protected int | null $id;
     protected string $title;
     protected string $description;
-    protected ?array $links;
+    protected array | null $links;
 
     /**
      * @param int|null $id
