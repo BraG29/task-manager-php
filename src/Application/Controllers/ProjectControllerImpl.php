@@ -42,12 +42,13 @@ class ProjectControllerImpl implements ProjectController {
         }
 
         $links = $project->getLinks();
-        $LinksDTOArray = [];
+        $linkDTOArray = [];
 
         foreach ($links as $link) {
-            $LinksDTOArray[] = new LinkDTO(
-                id: $link->getId(),
-                creationDate: $link->getLinkDate(),
+
+            $linkDTOArray[] = new LinkDTO(
+                id: null,
+                creationDate: null,
                 role: $link->getRole(),
                 creatableDTO: null,
                 user: new UserDTO($link->getUser())
@@ -57,39 +58,25 @@ class ProjectControllerImpl implements ProjectController {
         $TasksDTOArray = [];
 
         foreach ($project->getTasks() as $task) {
-
-            $LinksDTOArrayForTask = [];
-
-            foreach ($task->getLinks() as $link) {
-                $LinksDTOArrayForTask[] = new LinkDTO(
-                    id: $link->getId(),
-                    creationDate: $link->getCreationDate(),
-                    role: $link->getRole(),
-                    creatableDTO: null,
-                    user: new UserDTO($link->getUser())
-                );
-            }
             $TasksDTOArray[] = new TaskDTO(
                 id: $task->getId(),
                 title: $task->getTitle(),
                 description: $task->getDescription(),
-                links: $LinksDTOArrayForTask,
-                project: $task->getProject(),
-                taskState: $task->getTaskState(),
-                limitDate: $task->getLimitDate(),
-                userID: $task->getUserId()
+                links: null,
+                project: null,
+                taskState: null,
+                limitDate: null,
+                userID: null
             );
         }
 
-        $projectDTOClass = ProjectDTO::class;
-        return new $projectDTOClass(
-            id: $project->getId(),
-            name: $project->getTitle(),
-            description: $project->getDescription(),
-            state: $project->isAvailable(),
-            users: $LinksDTOArray,
-            tasks: $TasksDTOArray
-        );
+        return new ProjectDTO(
+        id: $project->getId(),
+        title: $project->getTitle(),
+        description: $project->getDescription(),
+        links: $linkDTOArray,
+        state: $project->isAvailable(),
+        tasks: $TasksDTOArray);
     }
 
     /**
@@ -107,18 +94,18 @@ class ProjectControllerImpl implements ProjectController {
         }
 
         $linkSet = $user->getLinks();
-
-        $linkDTOArray = [];
         $projectDTOArray = [];
 
         foreach ($linkSet as $link) {
             if($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) {
                 if ($link->getCreatable() instanceof Project) {
 
-                    $project = $link->getCreatable();
-                    $projectLinks = $project->getLinks();
+                    $projectDTOArray[] = $this->getProjectData($link->getCreatable()->getId());
 
-                    foreach ($projectLinks as $linkOfProject) {
+
+                    /*foreach ($projectLinks as $linkOfProject) {
+
+
                         $linkDTOArray[] = new LinkDTO(
                             id: null,
                             creationDate: null,
@@ -150,7 +137,7 @@ class ProjectControllerImpl implements ProjectController {
                         links: $linkDTOArray,
                         state: $project->isAvailable(),
                         tasks: $TasksDTOArray
-                    );
+                    );*/
                 }
             }
         }
