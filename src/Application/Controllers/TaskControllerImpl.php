@@ -266,8 +266,9 @@ class TaskControllerImpl implements TaskController{
                 //if the creatable we find in the user's link is the same as the project one
                 if(  $link->getCreatable()->getId() == $projectTask->getId() ){
 
-                    //check privileges
-                    if ($link->getRole() == RoleType::ADMIN ||  $link->getRole() == RoleType::EDITOR){
+                    //if the user of the link is the admin of the project (there is only one)
+                    //we just need to create one link for the task
+                    if ($link->getRole() == RoleType::ADMIN){
 
                         //create the link domain object
                         $linkToAdd = new Link(null,
@@ -283,6 +284,48 @@ class TaskControllerImpl implements TaskController{
                         $this->linkRepository->save($linkToAdd);
 
                         return $taskID;
+
+                    //if the user of the link is NOT the admin of the project
+                    //we need to create an extra link for the project's admin
+                    }elseif ( $link->getRole() == RoleType::EDITOR){
+
+
+                        //we get the links from the project we're adding a task for
+                        $projectLinks = $projectTask->getLinks();
+
+                        //we iterate those links
+                        foreach ($projectLinks as $projectLink){
+
+
+                            if ($projectLink->getRole() == RoleType::ADMIN){
+
+                                //create the link domain object
+                                $linkToAdd = new Link(null,
+                                    new DateTimeImmutable('now'),
+                                    RoleType::ADMIN,
+                                    $task,
+                                    $userToCheck);
+
+                                //we try to persist the task
+                                $taskID = $this->taskRepository->addTask($task);
+
+                                //we persist the link
+                                $this->linkRepository->save($linkToAdd);
+
+                                //create a link on the task for the project's admin
+                                $linkToAdd = new Link(null,
+                                    new DateTimeImmutable('now'),
+                                    RoleType::ADMIN,
+                                    $task,
+                                    $projectLink->getUser());
+
+                                //we persist the link
+                                $this->linkRepository->save($linkToAdd);
+
+                                return $taskID;
+
+                            }
+                        }
                     }
                 }
             }
