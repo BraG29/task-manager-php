@@ -75,7 +75,7 @@ class ProjectControllerImpl implements ProjectController {
                 description: $task->getDescription(),
                 links: $LinksDTOArrayForTask,
                 project: $task->getProject(),
-                taskState: $task->isAvailable(),
+                taskState: $task->getTaskState(),
                 limitDate: $task->getLimitDate(),
                 userID: $task->getUserId()
             );
@@ -113,54 +113,60 @@ class ProjectControllerImpl implements ProjectController {
         $projectDTOArray = [];
 
         foreach ($linkSet as $link) {
-            $linkDTOArray[] = new LinkDTO(
-                id: $link->getId(),
-                creationDate: $link->getLinkDate(),
-                role: $link->getRole(),
-                creatableDTO: null,
-                user: new UserDTO($link->getUser())
-            );
-        }
-        foreach ($linkSet as $link) {
-            if ($link->getCreatable() instanceof Project) {
+            if($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) {
+                if ($link->getCreatable() instanceof Project) {
 
-                $TasksDTOArray = [];
-                $linksDTOArrayForTask = [];
+                    $project = $link->getCreatable();
+                    $projectLinks = $project->getLinks();
 
-                foreach ($link->getCreatable()->getTasks() as $task) {
-                    foreach ($task->getLinks() as $link) {
-
-                        $linksDTOArrayForTask[] = new LinkDTO(
-                            id: $link->getId(),
-                            creationDate: $link->getCreationDate(),
-                            role: $link->getRole(),
+                    foreach ($projectLinks as $linkOfProject) {
+                        $linkDTOArray[] = new LinkDTO(
+                            id: $linkOfProject->getId(),
+                            creationDate: $linkOfProject->getLinkDate(),
+                            role: $linkOfProject->getRole(),
                             creatableDTO: null,
-                            user: new UserDTO($link->getUser())
+                            user: new UserDTO($linkOfProject->getUser())
                         );
                     }
 
-                    $TasksDTOArray[] = new TaskDTO(
-                        id: $task->getId(),
-                        title: $task->getTitle(),
-                        description: $task->getDescription(),
-                        links: $linksDTOArrayForTask,
-                        project: $task->getProject(),
-                        taskState: $task->isAvailable(),
-                        limitDate: $task->getLimitDate(),
-                        userID: $task->getUserId()
+                    $TasksDTOArray = [];
+                    $linksDTOArrayForTask = [];
+
+                    foreach ($link->getCreatable()->getTasks() as $task) {
+                        foreach ($task->getLinks() as $link) {
+
+                            $linksDTOArrayForTask[] = new LinkDTO(
+                                id: $link->getId(),
+                                creationDate: $link->getCreationDate(),
+                                role: $link->getRole(),
+                                creatableDTO: null,
+                                user: new UserDTO($link->getUser())
+                            );
+                        }
+
+                        $TasksDTOArray[] = new TaskDTO(
+                            id: $task->getId(),
+                            title: $task->getTitle(),
+                            description: $task->getDescription(),
+                            links: $linksDTOArrayForTask,
+                            project: $task->getProject(),
+                            taskState: $task->isAvailable(),
+                            limitDate: $task->getLimitDate(),
+                            userID: 0
+                        );
+                    }
+
+                    $project = $link->getCreatable();
+                    $projectDTOArray[] = new ProjectDTO(
+                        id: $project->getId(),
+                        title: $project->getTitle(),
+                        description: $project->getDescription(),
+                        links: $linkDTOArray,
+                        state: $project->isAvailable(),
+                        tasks: $TasksDTOArray
                     );
+
                 }
-
-                $project = $link->getCreatable();
-                $projectDTOArray[] = new ProjectDTO(
-                    id: $project->getId(),
-                    name: $project->getTitle(),
-                    description: $project->getDescription(),
-                    state: $project->isAvailable(),
-                    users: $linkDTOArray,
-                    tasks: $TasksDTOArray
-                );
-
             }
         }
         return $projectDTOArray;
@@ -173,7 +179,7 @@ class ProjectControllerImpl implements ProjectController {
     {
         $newProject = new Project(
             id: null,
-            name: $projectDTO->getName(),
+            name: $projectDTO->getTitle(),
             description: $projectDTO->getDescription(),
             links: null,
             state: $projectDTO->isAvailable()
@@ -195,7 +201,7 @@ class ProjectControllerImpl implements ProjectController {
             return $newProject->getId();
 
         }catch (Exception $e){
-            echo "No se pudo dar de alta el Projecto: " . $projectDTO->getName() . " | " . $e->getMessage();
+            echo "No se pudo dar de alta el Projecto: " . $projectDTO->getTitle() . " | " . $e->getMessage();
             return 0;
         }
     }
@@ -208,7 +214,7 @@ class ProjectControllerImpl implements ProjectController {
         }
 
         $project = $this->projectRepository->findById($projectDTO->getId());
-        $project->setTitle($projectDTO->getName());
+        $project->setTitle($projectDTO->getTitle());
         $project->setDescription($projectDTO->getDescription());
 
         return $this->projectRepository->editProject($project);

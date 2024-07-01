@@ -15,13 +15,14 @@ class TaskDTO extends CreatableDTO{
     private int | null $userID;
 
     /**
-     * @param int $id
-     * @param string $title
-     * @param string $description
-     * @param array $links
-     * @param int $project
-     * @param State $taskState
-     * @param DateTimeImmutable $limitDate
+     * @param int|null $id
+     * @param string|null $title
+     * @param string|null $description
+     * @param array|null $links
+     * @param int|null $project
+     * @param State|null $taskState
+     * @param DateTimeImmutable|null $limitDate
+     * @param int|null $userID
      */
     public function __construct(
                                                 int | null $id,

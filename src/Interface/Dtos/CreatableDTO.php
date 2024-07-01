@@ -3,17 +3,17 @@
 namespace App\Interface\Dtos;
 use JsonSerializable;
 
-abstract class CreatableDTO{
+abstract class CreatableDTO implements JsonSerializable{
     protected ?int $id;
     protected string $title;
     protected string $description;
     protected ?array $links;
 
     /**
-     * @param int $id
+     * @param int|null $id
      * @param string $title
      * @param string $description
-     * @param array $links
+     * @param array|null $links
      */
     public function __construct(int | null $id,
                                 string $title,
@@ -30,7 +30,7 @@ abstract class CreatableDTO{
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

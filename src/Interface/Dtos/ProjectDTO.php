@@ -5,22 +5,24 @@ namespace App\Interface\Dtos;
 use App\Domain\Entities\Project;
 use JsonSerializable;
 
-class ProjectDTO implements JsonSerializable{
+class ProjectDTO extends CreatableDTO{
 
-    private ?int $id;
-    private string $name;
-    private string $description;
-    private ?bool $available;
-    private ?array $users;
+
+    private ?bool $state;
     private ?array $tasks;
 
 
-    public function __construct(?int $id, string $name, string $description, ?bool $state, ?array $users  = [], ?array $tasks = []) {
+    public function __construct(int | null $id,
+                                string | null $title,
+                                string | null $description,
+                                array | null $links,
+                                ?bool $state,
+                                ?array $tasks = []){
         $this->id = $id;
-        $this->name = $name;
+        $this->title = $title;
         $this->description = $description;
-        $this->available = $state;
-        $this->users = $users;
+        $this->state = $state;
+        $this->links = $links;
         $this->tasks = $tasks;
     }
 
@@ -39,14 +41,14 @@ class ProjectDTO implements JsonSerializable{
         );
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getName(): string
+    public function getTitle(): string
     {
-        return $this->name;
+        return $this->title;
     }
 
     public function getDescription(): string
@@ -56,35 +58,37 @@ class ProjectDTO implements JsonSerializable{
 
     public function isAvailable(): bool
     {
-        return $this->available;
+        return $this->state;
     }
 
-    public function getUsers(): ?array
+    public function getLinks(): array
     {
-        return $this->users;
+        return $this->links;
     }
-    public function getUserById(int $userId): ?array
+    public function getUserById(int $userId): ?array //unused and probably unnecessary
     {
-        foreach ($this->users as $user) {
-            if ($user['id'] === $userId) {
-                return $user;
-            }
-            else {
-                return null;
-            }
-        }
-        return null;
-    }
-    public function getTaskById(int $taskId): ?array{
 
-        foreach ($this->tasks as $task) {
-            if ($task['id'] === $taskId) {
-                return $task;
-            }
-            else {
-                return null;
-            }
-        }
+//        foreach ($this->links as $user) {
+//            if ($user['id'] === $userId) {
+//                return $user;
+//            }
+//            else {
+//                return null;
+//            }
+//        }
+       return null;
+    }
+    public function getTaskById(int $taskId): ?array //unused and probably unnecessary
+    {
+
+//        foreach ($this->tasks as $task) {
+//            if ($task['id'] === $taskId) {
+//                return $task;
+//            }
+//            else {
+//                return null;
+//            }
+//        }
         return null;
     }
     public function getFirstUserId(): ?int{
@@ -101,10 +105,10 @@ class ProjectDTO implements JsonSerializable{
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'title' => $this->title,
             'description' => $this->description,
-            'state' => $this->available,
-            'userList' => $this->users,
+            'state' => $this->state,
+            'linkList' => $this->links,
             'taskList' => $this->tasks
         ];
     }
