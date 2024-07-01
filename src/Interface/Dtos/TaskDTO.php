@@ -9,9 +9,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use JsonSerializable;
 
 class TaskDTO extends CreatableDTO{
-    private DateTimeImmutable $limitDate;
-    private State $taskState;
-    private int $project;
+    private DateTimeImmutable | null $limitDate;
+    private State | null $taskState;
+    private int |null $project;
     private int | null $userID;
 
     /**
@@ -25,12 +25,12 @@ class TaskDTO extends CreatableDTO{
      */
     public function __construct(
                                                 int | null $id,
-                                                string $title,
-                                                string $description,
+                                                string | null $title,
+                                                string | null $description,
                                                 array | null $links,
-                                                int $project,
-                                                State $taskState,
-                                                DateTimeImmutable $limitDate,
+                                                int | null  $project,
+                                                State | null $taskState,
+                                                DateTimeImmutable | null $limitDate,
                                                 int | null $userID){
 
         parent::__construct($id,  $title,  $description,  $links);
