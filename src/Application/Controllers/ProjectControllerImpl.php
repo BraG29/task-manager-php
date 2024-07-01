@@ -99,7 +99,6 @@ class ProjectControllerImpl implements ProjectController {
      */
     public function getProjectDataByUser(int $userId): ?array
     {
-
         $user = $this->userRepository->findById($userId);
 
         if (!$user) {
@@ -121,8 +120,8 @@ class ProjectControllerImpl implements ProjectController {
 
                     foreach ($projectLinks as $linkOfProject) {
                         $linkDTOArray[] = new LinkDTO(
-                            id: $linkOfProject->getId(),
-                            creationDate: $linkOfProject->getLinkDate(),
+                            id: null,
+                            creationDate: null,
                             role: $linkOfProject->getRole(),
                             creatableDTO: null,
                             user: new UserDTO($linkOfProject->getUser())
@@ -130,20 +129,8 @@ class ProjectControllerImpl implements ProjectController {
                     }
 
                     $TasksDTOArray = [];
-                    $linksDTOArrayForTask = [];
 
-                    foreach ($link->getCreatable()->getTasks() as $task) {
-                        foreach ($task->getLinks() as $link) {
-
-                            $linksDTOArrayForTask[] = new LinkDTO(
-                                id: $link->getId(),
-                                creationDate: $link->getCreationDate(),
-                                role: $link->getRole(),
-                                creatableDTO: null,
-                                user: new UserDTO($link->getUser())
-                            );
-                        }
-
+                    foreach ($project->getTasks() as $task) {
                         $TasksDTOArray[] = new TaskDTO(
                             id: $task->getId(),
                             title: $task->getTitle(),
@@ -156,7 +143,6 @@ class ProjectControllerImpl implements ProjectController {
                         );
                     }
 
-                    $project = $link->getCreatable();
                     $projectDTOArray[] = new ProjectDTO(
                         id: $project->getId(),
                         title: $project->getTitle(),
@@ -165,7 +151,6 @@ class ProjectControllerImpl implements ProjectController {
                         state: $project->isAvailable(),
                         tasks: $TasksDTOArray
                     );
-
                 }
             }
         }

@@ -8,14 +8,14 @@ use JsonSerializable;
 
 class LinkDTO implements JsonSerializable{
 
-    private ?int $id;
-    private DateTimeImmutable $creationDate;
+    private int | null $id;
+    private DateTimeImmutable | null $creationDate;
     private RoleType $role;
     private CreatableDTO | null $creatableDTO;
     private ?UserDTO $user;
 
-    public function __construct(?int $id,
-                                DateTimeImmutable $creationDate,
+    public function __construct(int | null  $id,
+                                DateTimeImmutable | null  $creationDate,
                                 RoleType $role,
                                 CreatableDTO | null $creatableDTO,
                                 ?UserDTO $user){
