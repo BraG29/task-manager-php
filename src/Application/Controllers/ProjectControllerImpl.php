@@ -148,11 +148,11 @@ class ProjectControllerImpl implements ProjectController {
                             id: $task->getId(),
                             title: $task->getTitle(),
                             description: $task->getDescription(),
-                            links: $linksDTOArrayForTask,
-                            project: $task->getProject(),
-                            taskState: $task->isAvailable(),
-                            limitDate: $task->getLimitDate(),
-                            userID: 0
+                            links: null,
+                            project: null,
+                            taskState: null,
+                            limitDate: null,
+                            userID: null
                         );
                     }
 
