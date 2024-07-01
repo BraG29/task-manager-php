@@ -108,10 +108,11 @@ class ProjectControllerImpl implements ProjectController {
 
         $linkSet = $user->getLinks();
 
-        $linkDTOArray = [];
         $projectDTOArray = [];
 
         foreach ($linkSet as $link) {
+            $linkDTOArray = [];
+
             if($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) {
                 if ($link->getCreatable() instanceof Project) {
 
