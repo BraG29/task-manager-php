@@ -38,11 +38,9 @@ return function (App $app, TaskController $taskController) {
 
     //http://localhost:8080/tasks/{id}
     $app->get("/tasks/{id}", function (Request $request, Response $response, $args) use ($taskController) {
-        $id = $args['id'];
-
         try {
 
-            $task = $taskController->getTaskById($id);
+            $task = $taskController->getTaskById($args["id"]);
 
 
             $response->getBody()->write(json_encode($task->jsonSerialize()));
@@ -106,6 +104,22 @@ return function (App $app, TaskController $taskController) {
         }catch (Exception $e){
             $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
+        }
+    });
+
+    $app->put("/tasks/update", function (Request $request, Response $response, $args) use ($taskController) {
+        $json = $request->getBody();
+        $data = json_decode($json, true);
+
+        $taskDTO = TaskDTO::fromArray($data);
+
+        try {
+            $taskController->updateTask($taskDTO, $data['userID']);
+            $response->getBody()->write(json_encode(["message"=>"Tarea actualizada con id: " . $data['id']]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+        }catch (Exception $e){
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
     });
 };

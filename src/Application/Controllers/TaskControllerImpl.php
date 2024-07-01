@@ -343,18 +343,47 @@ class TaskControllerImpl implements TaskController{
         }
     }
 
-    //TODO: EN QUE MOMENTO DE INCONSCIENCIA COLECTIVA
-    //TODO: SE ME DIO POR RECIBIR UN OBJETO DE DOMINIO DESDE EL ENDPOINT?!?!?!?!?!?!?!?
-    //TODO: APARTE EL NOMBRE ESTÁ RE ROTO AMIGO NOOOOO
-    //check the privileges of the user who is deleting the task
-    public function updateTask(Task $taskId){
+
+    /**
+     * @throws Exception
+     */
+    public function updateTask(TaskDTO $taskDTO, int $userId): void{
+
 
         try {
-            $this->taskRepository->updateTask($taskId);
+            // base null controls
+            if($this->userRepository->findById($userId) == null){
+                throw new Exception("No se pudo encontrar el usuario con ID: " . $userId);
+            }
+            if($this->taskRepository->findById($taskDTO->getId()) == null){
+                throw new Exception("No se pudo encontrar la tarea con ID: " . $taskId);
+            }
+
+            $task = $this->taskRepository->findById($taskDTO->getId());
+            $task->setTitle($taskDTO->getTitle());
+            $task->setDescription($taskDTO->getDescription());
+            $task->setLimitDate($taskDTO->getLimitDate());
+            $task->setTaskState($taskDTO->getTaskState());
+
+            foreach ($task->getLinks() as $taskLink) {
+                if ($taskLink->getRole() == RoleType::ADMIN) {
+                    if ($taskLink->getUser()->getId() == $userId) {
+                        $this->taskRepository->updateTask($task);
+                        return;
+                    }
+                }
+            }
+
+            throw new Exception("el usuario: " . $userId . " no esta autorizado para editar esta tarea: " . $taskId);
+
         }catch (Exception $e){
 
+            echo "No se pudo editar la tarea: " . $taskId;
+            echo "\n";
+            echo "-----------------------------------------------------------------------------------------------------" . "\n";
+            echo "Razón: " . $e->getMessage();
+            throw $e;
         }
-
     }
 
 
@@ -365,7 +394,8 @@ class TaskControllerImpl implements TaskController{
      * @throws ORMException
      * @throws Exception
      */
-    public function deleteTask(int $taskId, int $userId){
+    public function deleteTask(int $taskId, int $userId): void
+    {
 
         try {
             //we find the user that wants to delete the task
