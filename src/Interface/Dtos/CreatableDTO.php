@@ -3,7 +3,7 @@
 namespace App\Interface\Dtos;
 use JsonSerializable;
 
-abstract class CreatableDTO{
+abstract class CreatableDTO implements JsonSerializable{
     protected ?int $id;
     protected string $title;
     protected string $description;
