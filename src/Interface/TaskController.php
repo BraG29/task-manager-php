@@ -15,7 +15,7 @@ interface TaskController{
 
     public function createTask(TaskDTO $taskDTO): ?int;
 
-    public function updateTask(Task $taskId);
+    public function updateTask(TaskDTO $taskDTO, int $userId);
 
     public function deleteTask(int $taskId, int $userId);
 }

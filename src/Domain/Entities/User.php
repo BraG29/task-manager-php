@@ -129,6 +129,28 @@ class User
         $this->verified = $verified;
     }
 
+    public function getProjects(): array
+    {
+        $links = $this->getLinks();
+        $projects = [];
+        foreach ($links as $link) {
+            if($link->getCreatable() instanceof Project){
+                $projects[] = $link;
+            }
+        }
+        return $projects;
+    }
 
+    public function getTasks(): array
+    {
+        $links = $this->getLinks();
+        $tasks = [];
+        foreach ($links as $link) {
+            if($link->getCreatable() instanceof Task){
+                $tasks[] = $link;
+            }
+        }
+        return $tasks;
+    }
 
 }

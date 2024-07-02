@@ -15,6 +15,7 @@ use App\Domain\Repositories\ProjectRepository;
 use App\Interface\Dtos\ProjectDTO;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 
 class ProjectControllerImpl implements ProjectController {
@@ -93,52 +94,12 @@ class ProjectControllerImpl implements ProjectController {
             throw new Exception('User not found');
         }
 
-        $linkSet = $user->getLinks();
+        $linkSet = $user->getProjects();
         $projectDTOArray = [];
 
         foreach ($linkSet as $link) {
             if($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) {
-                if ($link->getCreatable() instanceof Project) {
-
                     $projectDTOArray[] = $this->getProjectData($link->getCreatable()->getId());
-
-
-                    /*foreach ($projectLinks as $linkOfProject) {
-
-
-                        $linkDTOArray[] = new LinkDTO(
-                            id: null,
-                            creationDate: null,
-                            role: $linkOfProject->getRole(),
-                            creatableDTO: null,
-                            user: new UserDTO($linkOfProject->getUser())
-                        );
-                    }
-
-                    $TasksDTOArray = [];
-
-                    foreach ($project->getTasks() as $task) {
-                        $TasksDTOArray[] = new TaskDTO(
-                            id: $task->getId(),
-                            title: $task->getTitle(),
-                            description: $task->getDescription(),
-                            links: null,
-                            project: null,
-                            taskState: null,
-                            limitDate: null,
-                            userID: null
-                        );
-                    }
-
-                    $projectDTOArray[] = new ProjectDTO(
-                        id: $project->getId(),
-                        title: $project->getTitle(),
-                        description: $project->getDescription(),
-                        links: $linkDTOArray,
-                        state: $project->isAvailable(),
-                        tasks: $TasksDTOArray
-                    );*/
-                }
             }
         }
         return $projectDTOArray;
@@ -178,25 +139,66 @@ class ProjectControllerImpl implements ProjectController {
         }
     }
 
-    public function editProject(ProjectDTO $projectDTO): ?int
+    /**
+     * @throws Exception
+     */
+    public function editProject(ProjectDTO $projectDTO, int $userId): void
     {
-        if ($this->projectRepository->findById($projectDTO->getId()) === null) {
-            echo("Project not found");
-            return 0;
+        try {
+            $project = $this->projectRepository->findById($projectDTO->getId());
+            $user = $this->userRepository->findById($userId);
+            if ($project === null) {
+                throw new Exception('Projecto no encontrado');
+            }
+            if ($user === null) {
+                throw new Exception('Usuario no encontrado');
+            }
+
+            foreach ($project->getLinks() as $link) {
+                if(($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) && $link->getUser()->getId() === $userId) {
+                    continue;
+                }
+                throw new Exception('No tiene permisos para editar este Projecto');
+            }
+
+            $project->setTitle($projectDTO->getTitle());
+            $project->setDescription($projectDTO->getDescription());
+
+            $this->projectRepository->editProject($project);
         }
-
-        $project = $this->projectRepository->findById($projectDTO->getId());
-        $project->setTitle($projectDTO->getTitle());
-        $project->setDescription($projectDTO->getDescription());
-
-        return $this->projectRepository->editProject($project);
+        catch(Exception $e){
+            throw new Exception( "No se pudo editar el Projecto: " . $projectDTO->getTitle() . " | " . $e->getMessage());
+        }
     }
-
-    public function deleteProject(int $projectId): int
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function deleteProject(int $projectId, int $userId): void
     {
-        if ($this->projectRepository->findById($projectId) === null) {
-            return 0;
+        try {
+            if ($this->projectRepository->findById($projectId) === null) {
+                throw new Exception('Projecto no encontrado');
+            }
+            if ($this->userRepository->findById($userId) === null) {
+                throw new Exception('Usuario no encontrado');
+            }
+
+            $project = $this->projectRepository->findById($projectId);
+
+            foreach ($project->getLinks() as $link) {
+                if ($link->getRole() === RoleType::ADMIN && $link->getUser()->getId() === $userId) {
+                    $this->projectRepository->deleteProject($link->getCreatable()->getId());
+                    return;
+                }
+                else {
+                    throw new Exception('Usuario no autorizado');
+                }
+            }
         }
-        return $this->projectRepository->deleteProject($projectId);
+        catch (Exception $e) {
+            throw new Exception( "No se pudo borrar el Projecto: " . $projectId . " | " . $e->getMessage());
+        }
     }
 }

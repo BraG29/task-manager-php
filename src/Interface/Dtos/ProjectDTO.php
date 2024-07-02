@@ -15,13 +15,10 @@ class ProjectDTO extends CreatableDTO{
                                 string | null $title,
                                 string | null $description,
                                 array | null $links,
-                                ?bool $state,
-                                ?array $tasks = []){
-        $this->id = $id;
-        $this->title = $title;
-        $this->description = $description;
+                                bool | null $state,
+                                array |null $tasks = []){
+        parent::__construct($id, $title, $description, $links); // Call the parent constructor
         $this->state = $state;
-        $this->links = $links;
         $this->tasks = $tasks;
     }
 
@@ -31,12 +28,12 @@ class ProjectDTO extends CreatableDTO{
             return null;
         }
         return new ProjectDTO(
-            $data['id'],
-            $data['name'],
-            $data['description'],
-            $data['state'],
-            $data['userList'],
-            $data['taskList']
+            id: $data['id'],
+            title: $data['title'],
+            description: $data['description'],
+            links: null,
+            state: $data['state'],
+            tasks: null
         );
     }
 
