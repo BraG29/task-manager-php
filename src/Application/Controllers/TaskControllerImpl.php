@@ -311,19 +311,31 @@ class TaskControllerImpl implements TaskController{
     public function updateTask(TaskDTO $taskDTO, int $userId): void{
 
         try {
+            $task = $this->taskRepository->findById($taskDTO->getId());
+            $user = $this->userRepository->findById($userId);
             // base null controls
-            if($this->userRepository->findById($userId) == null){
+            if($user == null){
                 throw new Exception("No se pudo encontrar el usuario con ID: " . $userId);
             }
-            if($this->taskRepository->findById($taskDTO->getId()) == null){
+            if($task == null){
                 throw new Exception("No se pudo encontrar la tarea con ID: " . $taskDTO->getId());
             }
 
-            $task = $this->taskRepository->findById($taskDTO->getId());
-            $task->setTitle($taskDTO->getTitle());
-            $task->setDescription($taskDTO->getDescription());
-            $task->setLimitDate($taskDTO->getLimitDate());
-            $task->setTaskState($taskDTO->getTaskState());
+            if($taskDTO->getTitle() != null){
+                $task->setTitle($taskDTO->getTitle());
+            }
+
+            if($taskDTO->getDescription() != null){
+                $task->setDescription($taskDTO->getDescription());
+            }
+
+            if($taskDTO->getLimitDate() != null){
+                $task->setLimitDate($taskDTO->getLimitDate());
+            }
+
+            if($taskDTO->getTaskState() != null){
+                $task->setTaskState($taskDTO->getTaskState());
+            }
 
             foreach ($task->getLinks() as $taskLink) {
                 if ($taskLink->getRole() == RoleType::ADMIN) {

@@ -5,8 +5,8 @@ use JsonSerializable;
 
 abstract class CreatableDTO implements JsonSerializable{
     protected int | null $id;
-    protected string $title;
-    protected string $description;
+    protected string | null $title;
+    protected string | null $description;
     protected array | null $links;
 
     /**
@@ -16,8 +16,8 @@ abstract class CreatableDTO implements JsonSerializable{
      * @param array|null $links
      */
     public function __construct(int | null $id,
-                                string $title,
-                                string $description,
+                                string | null $title,
+                                string | null $description,
                                 array | null $links)
     {
         $this->id = $id;

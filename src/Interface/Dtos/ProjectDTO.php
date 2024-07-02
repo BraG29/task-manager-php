@@ -7,8 +7,8 @@ use JsonSerializable;
 
 class ProjectDTO extends CreatableDTO{
 
-    private ?bool $state;
-    private ?array $tasks;
+    private bool | null $state;
+    private array | null $tasks;
 
 
     public function __construct(int | null $id,
