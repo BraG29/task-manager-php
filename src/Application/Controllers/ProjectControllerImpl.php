@@ -161,8 +161,13 @@ class ProjectControllerImpl implements ProjectController {
                 throw new Exception('No tiene permisos para editar este Projecto');
             }
 
-            $project->setTitle($projectDTO->getTitle());
-            $project->setDescription($projectDTO->getDescription());
+            if($projectDTO->getTitle() != null){
+                $project->setTitle($projectDTO->getTitle());
+            }
+
+            if($projectDTO->getDescription() != null){
+                $project->setDescription($projectDTO->getDescription());
+            }
 
             $this->projectRepository->editProject($project);
         }
