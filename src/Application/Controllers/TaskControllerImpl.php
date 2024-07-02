@@ -293,11 +293,12 @@ class TaskControllerImpl implements TaskController{
 
 
         } catch (Exception $e) {
-
+            /*
             echo "No se pudo dar de alta la tarea: " . $taskDTO->getTitle();
             echo "\n";
             echo "-----------------------------------------------------------------------------------------------------" . "\n";
             echo "Razón: " . $e->getMessage();
+            */
             throw $e;
             //return 0;
         }
