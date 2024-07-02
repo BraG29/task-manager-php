@@ -52,26 +52,31 @@ return function (App $app, ProjectController $projectController) {
     /*
      *
      {
-        "name" : "Example Project",
+        "id" : 0, // replace with project id
+        "title" : "Example Project",
         "description" : "Example Description",
+        "userId" : 1 //replace your user id here
      }
      *
      */
 
     // this should only edit the Project Information such as name or description
-    $app->put('/EditProject/{projectId}', function (Request $request, Response $response, $args) use ($projectController) {
+    $app->put('/EditProject', function (Request $request, Response $response, $args) use ($projectController) {
         $json = $request->getBody();
         $data = json_decode($json, true);
-
-        $updatedProjectId = $projectController->editProject(ProjectDTO::fromArray($data));
-
-        if ($updatedProjectId == 0) {
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-        } else {
-            $response->getBody()->write(json_encode("Project updated with ID: " . $updatedProjectId));
-            return $response;
+        try {
+            $projectController->editProject(ProjectDTO::fromArray($data), $data['userId']);
+            $response->getBody()->write(json_encode("Projecto editado con id: " . $data['id']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
         }
+        catch(Exception $e){
+            $response->getBody()->write(json_encode(["error"=>$e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
     });
+
+
 
     $app->delete('/DeleteProject', function (Request $request, Response $response, $args) use ($projectController) {
         $json = $request->getBody();

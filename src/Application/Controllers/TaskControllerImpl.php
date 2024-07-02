@@ -5,7 +5,6 @@ namespace App\Application\Controllers;
 use App\Domain\Entities\Enums\RoleType;
 use App\Domain\Entities\Link;
 use App\Domain\Entities\Task;
-use App\Domain\Entities\User;
 use App\Domain\Repositories\LinkRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\TaskRepository;
@@ -14,11 +13,9 @@ use App\Interface\Dtos\LinkDTO;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
-use App\Domain\Entities\Enums\State;
 use DateTimeImmutable;
 
 class TaskControllerImpl implements TaskController{
@@ -80,7 +77,7 @@ class TaskControllerImpl implements TaskController{
                     creatableDTO: null,
                     user: new UserDTO($userToSearch)
                 );
-                
+
                 $task = $taskLink->getCreatable();
                 //we create the taskDTO from the task data
                 $tasksDTO[] = new TaskDTO($task->getId(),
@@ -144,7 +141,7 @@ class TaskControllerImpl implements TaskController{
             }
             return $tasksDTO;
         }catch(Exception $e){
-            throw $e;
+            throw new Exception($e->getMessage());
         }
     }
 

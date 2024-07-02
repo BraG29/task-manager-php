@@ -139,18 +139,36 @@ class ProjectControllerImpl implements ProjectController {
         }
     }
 
-    public function editProject(ProjectDTO $projectDTO): ?int
+    /**
+     * @throws Exception
+     */
+    public function editProject(ProjectDTO $projectDTO, int $userId): void
     {
-        if ($this->projectRepository->findById($projectDTO->getId()) === null) {
-            echo("Project not found");
-            return 0;
+        try {
+            $project = $this->projectRepository->findById($projectDTO->getId());
+            $user = $this->userRepository->findById($userId);
+            if ($project === null) {
+                throw new Exception('Projecto no encontrado');
+            }
+            if ($user === null) {
+                throw new Exception('Usuario no encontrado');
+            }
+
+            foreach ($project->getLinks() as $link) {
+                if(($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) && $link->getUser()->getId() === $userId) {
+                    continue;
+                }
+                throw new Exception('No tiene permisos para editar este Projecto');
+            }
+
+            $project->setTitle($projectDTO->getTitle());
+            $project->setDescription($projectDTO->getDescription());
+
+            $this->projectRepository->editProject($project);
         }
-
-        $project = $this->projectRepository->findById($projectDTO->getId());
-        $project->setTitle($projectDTO->getTitle());
-        $project->setDescription($projectDTO->getDescription());
-
-        return $this->projectRepository->editProject($project);
+        catch(Exception $e){
+            throw new Exception( "No se pudo editar el Projecto: " . $projectDTO->getTitle() . " | " . $e->getMessage());
+        }
     }
     /**
      * @throws OptimisticLockException
