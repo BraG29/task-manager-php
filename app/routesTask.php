@@ -101,7 +101,7 @@ return function (App $app, TaskController $taskController) {
             var_dump($taskId, $userId);
             $taskController->deleteTask($taskId, $userId);
 
-            $response->getBody()->write(json_encode(["message"=>"Tarea eliminada con id: " . $data['taskId']]));
+            $response->getBody()->write(json_encode(["message"=>"Tarea eliminada con id: " . $taskId]));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
 
         }catch (Exception $e){
