@@ -115,7 +115,7 @@ public function jsonSerialize(): array{
     }
 
     $taskState = null;
-    if ($data['taskState'] != null) {
+    if ($data['taskState'] != null || $data['taskState'] == 0) {
         $taskState = State::from($data['taskState']);
     }
 
