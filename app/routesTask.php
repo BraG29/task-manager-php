@@ -92,11 +92,14 @@ return function (App $app, TaskController $taskController) {
 
     //http://localhost:8080/tasks/delete
     $app->delete("/tasks/delete", function (Request $request, Response $response, $args) use ($taskController) {
-        $json = $request->getBody();
-        $data = json_decode($json, true);
+
+        $params = $request->getQueryParams();
+        $userId = $params['userId'];
+        $taskId = $params['taskId'];
 
         try {
-            $taskController->deleteTask($data['taskId'], $data['userId']);
+            var_dump($taskId, $userId);
+            $taskController->deleteTask($taskId, $userId);
 
             $response->getBody()->write(json_encode(["message"=>"Tarea eliminada con id: " . $data['taskId']]));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
