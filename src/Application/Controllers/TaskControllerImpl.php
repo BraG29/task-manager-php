@@ -84,7 +84,7 @@ class TaskControllerImpl implements TaskController{
                     title: $task->getTitle(),
                     description: $task->getDescription(),
                     links: $linksDTO,
-                    project: null,
+                    project: $task->getProject()->getId(),
                     taskState: $task->getTaskState(),
                     limitDate: $task->getLimitDate(),
                     userID: null);
