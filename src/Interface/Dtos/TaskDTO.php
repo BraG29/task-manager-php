@@ -6,7 +6,9 @@ use App\Domain\Entities\Enums\State;
 use App\Domain\Entities\Task;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
+use Exception;
 use JsonSerializable;
+use ReturnTypeWillChange;
 
 class TaskDTO extends CreatableDTO{
     private DateTimeImmutable | null $limitDate;
@@ -44,7 +46,7 @@ class TaskDTO extends CreatableDTO{
     /**
      * @return DateTimeImmutable
      */
-    public function getLimitDate(): DateTimeImmutable
+    public function getLimitDate(): DateTimeImmutable | null
     {
         return $this->limitDate;
     }
@@ -60,7 +62,7 @@ class TaskDTO extends CreatableDTO{
     /**
      * @return State
      */
-    public function getTaskState(): State
+    public function getTaskState(): State | null
     {
         return $this->taskState;
     }
@@ -76,7 +78,7 @@ class TaskDTO extends CreatableDTO{
     /**
      * @return int
      */
-    public function getProject(): int
+    public function getProject(): int | null
     {
         return $this->project;
     }
@@ -89,7 +91,7 @@ class TaskDTO extends CreatableDTO{
         $this->project = $project;
     }
 
-#[\ReturnTypeWillChange]
+#[ReturnTypeWillChange]
 public function jsonSerialize(): array{
         return [
             'id' => $this->id,
@@ -104,12 +106,18 @@ public function jsonSerialize(): array{
 }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public static function fromArray(array $data): TaskDTO{
 
-    $DataTime = new DateTimeImmutable($data['limitDate']);
-    $taskState = State::from($data['taskState']);
+    if($data['limitDate'] != null){
+        $DataTime = new DateTimeImmutable($data['limitDate']);
+    }
+
+    $taskState = null;
+    if ($data['taskState'] != null) {
+        $taskState = State::from($data['taskState']);
+    }
 
     //I get all the links from the data array
     $links = $data['links'];
@@ -130,14 +138,14 @@ public function jsonSerialize(): array{
     //TODO adjust the constructor so I can create LinkDTO when getting data  from the endpoint array
 
         return new self(
-            $data['id'] ?? null,
-            $data['title'] ,
-            $data['description'] ,
-            $linksDTOArray,
-            $data['project'],
-            $taskState,
-            $DataTime,
-            $data['userID'] ?? null);
+            id: $data['id'] ?? null,
+            title: $data['title'] ?? null,
+            description: $data['description'] ?? null,
+            links: $linksDTOArray,
+            project: $data['project'] ?? null,
+            taskState: $taskState ?? null,
+            limitDate: $DataTime ?? null,
+            userID: $data['userID'] ?? null);
     }
 
     /**

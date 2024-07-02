@@ -115,4 +115,5 @@ class Link
     {
         $this->user = $user;
     }
+
 }

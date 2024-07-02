@@ -24,7 +24,7 @@ abstract class Creatable
     protected Collection $links;
 
     /**
-     * @param int $id
+     * @param int|null $id
      * @param string $title
      * @param string $description
      */

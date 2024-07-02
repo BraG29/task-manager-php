@@ -25,6 +25,7 @@ class UserDTO implements JsonSerializable
      */
     public function __construct(User $user)
     {
+
         $this->id = $user->getId();
         $this->name = $user->getName();
         $this->lastName = $user->getLastName();
@@ -33,7 +34,7 @@ class UserDTO implements JsonSerializable
         $this->verified = $user->isVerified();
     }
 
-    public function getId(): ?int
+    public function getId(): int | null
     {
         return $this->id;
     }
@@ -43,7 +44,7 @@ class UserDTO implements JsonSerializable
         $this->id = $id;
     }
 
-    public function getName(): string
+    public function getName(): string | null
     {
         return $this->name;
     }
@@ -53,7 +54,7 @@ class UserDTO implements JsonSerializable
         $this->name = $name;
     }
 
-    public function getLastName(): string
+    public function getLastName(): string | null
     {
         return $this->lastName;
     }
@@ -63,7 +64,7 @@ class UserDTO implements JsonSerializable
         $this->lastName = $lastName;
     }
 
-    public function getEmail(): string
+    public function getEmail(): string | null
     {
         return $this->email;
     }
@@ -73,7 +74,7 @@ class UserDTO implements JsonSerializable
         $this->email = $email;
     }
 
-    public function getPassword(): string
+    public function getPassword(): string | null
     {
         return $this->password;
     }
@@ -83,7 +84,7 @@ class UserDTO implements JsonSerializable
         $this->password = $password;
     }
 
-    public function isVerified(): bool
+    public function isVerified(): bool | null
     {
         return $this->verified;
     }
@@ -123,5 +124,15 @@ class UserDTO implements JsonSerializable
             'email' => $this->email,
             'password' => $this->password
         ];
+    }
+
+    public function removeEmail(): void
+    {
+        $this->email = null;
+    }
+    public function removePassword(): void
+    {
+
+        $this->password = null;
     }
 }

@@ -11,8 +11,8 @@ abstract class CreatableDTO implements JsonSerializable{
 
     /**
      * @param int|null $id
-     * @param string $title
-     * @param string $description
+     * @param string|null $title
+     * @param string|null $description
      * @param array|null $links
      */
     public function __construct(int | null $id,
@@ -28,9 +28,9 @@ abstract class CreatableDTO implements JsonSerializable{
 
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): ?int
+    public function getId(): int | null
     {
         return $this->id;
     }
@@ -44,9 +44,9 @@ abstract class CreatableDTO implements JsonSerializable{
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTitle(): string
+    public function getTitle(): string | null
     {
         return $this->title;
     }
@@ -60,9 +60,9 @@ abstract class CreatableDTO implements JsonSerializable{
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getDescription(): string
+    public function getDescription(): string | null
     {
         return $this->description;
     }
@@ -76,9 +76,9 @@ abstract class CreatableDTO implements JsonSerializable{
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getLinks(): array
+    public function getLinks(): array | null
     {
         return $this->links;
     }
@@ -90,6 +90,5 @@ abstract class CreatableDTO implements JsonSerializable{
     {
         $this->links = $links;
     }
-
 
 }

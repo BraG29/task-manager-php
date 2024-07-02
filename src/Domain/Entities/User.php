@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities;
 
+use App\Interface\Dtos\UserDTO;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -152,6 +153,11 @@ class User
             }
         }
         return $tasks;
+    }
+
+    public function getDTO(): UserDTO
+    {
+        return new UserDTO($this);
     }
 
 }

@@ -28,6 +28,21 @@ class ProjectDTO extends CreatableDTO{
             return null;
         }
 
+        $state = null;
+        if($data['state'] != null){
+            $state = data['state'];
+        }
+
+        $title = null;
+        if($data['title'] != null){
+            $title = data['title'];
+        }
+
+        $description = null;
+        if($data['description'] != null){
+            $description = data['description'];
+        }
+
         $links = [];
 
         foreach ($data['links'] as $link){
@@ -36,10 +51,10 @@ class ProjectDTO extends CreatableDTO{
 
         return new ProjectDTO(
             id: $data['id'],
-            title: $data['title'],
-            description: $data['description'],
+            title: $title,
+            description: $description,
             links: $links,
-            state: $data['state'],
+            state: $state,
             tasks: null
         );
     }
@@ -49,17 +64,17 @@ class ProjectDTO extends CreatableDTO{
         return $this->id;
     }
 
-    public function getTitle(): string
+    public function getTitle(): string | null
     {
         return $this->title;
     }
 
-    public function getDescription(): string
+    public function getDescription(): string | null
     {
         return $this->description;
     }
 
-    public function isAvailable(): bool
+    public function isAvailable(): bool | null
     {
         return $this->state;
     }
@@ -68,7 +83,7 @@ class ProjectDTO extends CreatableDTO{
     {
         return $this->links;
     }
-    public function getUserById(int $userId): ?array //unused and probably unnecessary
+    public function getUserById(int $userId): array | null //unused and probably unnecessary
     {
 
 //        foreach ($this->links as $user) {
@@ -98,7 +113,7 @@ class ProjectDTO extends CreatableDTO{
         return $this->users[0]['id'];
     }
 
-    public function getTasks(): ?array
+    public function getTasks(): array | null
     {
         return $this->tasks;
     }

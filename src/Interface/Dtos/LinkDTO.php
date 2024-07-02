@@ -42,7 +42,7 @@ class LinkDTO implements JsonSerializable{
     /**
      * @return int|null
      */
-    public function getId(): ?int
+    public function getId(): int | null
     {
         return $this->id;
     }
@@ -50,7 +50,7 @@ class LinkDTO implements JsonSerializable{
     /**
      * @return DateTimeImmutable
      */
-    public function getCreationDate(): DateTimeImmutable
+    public function getCreationDate(): DateTimeImmutable | null
     {
         return $this->creationDate;
     }
@@ -58,7 +58,7 @@ class LinkDTO implements JsonSerializable{
     /**
      * @return RoleType
      */
-    public function getRole(): RoleType
+    public function getRole(): RoleType | null
     {
         return $this->role;
     }
@@ -66,7 +66,7 @@ class LinkDTO implements JsonSerializable{
     /**
      * @return CreatableDTO
      */
-    public function getCreatableDTO(): CreatableDTO
+    public function getCreatableDTO(): CreatableDTO | null
     {
         return $this->creatableDTO;
     }
@@ -74,7 +74,7 @@ class LinkDTO implements JsonSerializable{
     /**
      * @return UserDTO
      */
-    public function getUser(): UserDTO
+    public function getUser(): UserDTO | null
     {
         return $this->user;
     }
