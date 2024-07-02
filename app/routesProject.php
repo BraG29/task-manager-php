@@ -62,11 +62,11 @@ return function (App $app, ProjectController $projectController) {
      */
 
     // this should only edit the Project Information such as name or description
-    $app->put('/EditProject', function (Request $request, Response $response, $args) use ($projectController) {
+    $app->put('/EditProject/{userId}', function (Request $request, Response $response, $args) use ($projectController) {
         $json = $request->getBody();
         $data = json_decode($json, true);
         try {
-            $projectController->editProject(ProjectDTO::fromArray($data), $data['userId']);
+            $projectController->editProject(ProjectDTO::fromArray($data), $args['userId']);
             $response->getBody()->write(json_encode("Projecto editado con id: " . $data['id']));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
         }
