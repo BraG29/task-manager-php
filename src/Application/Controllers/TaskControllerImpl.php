@@ -13,6 +13,7 @@ use App\Interface\Dtos\LinkDTO;
 use App\Interface\Dtos\UserDTO;
 use App\Interface\TaskController;
 use App\Interface\Dtos\TaskDTO;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
@@ -59,37 +60,18 @@ class TaskControllerImpl implements TaskController{
             $userTasks = $userToSearch->getTasks();
 
             //if (empty($userLinksCheck)){
-            if (count($userTasks) < 1) {
+            if (count($userTasks) < 1 || $userTasks == null) {
                 throw new Exception(" el usuario: " . $userToSearch->getName() . " no tiene ninguna tarea asignada");
             }
 
-            //we prepare the array that we will be returning with the TaskDTOs
-            $linksDTO = [];
-            $tasksDTO = [];
+            $taskArray = [];
 
-            //we iterate to get all the links that are tasks
             foreach ($userTasks as $taskLink) {
-
-                $linksDTO[] = new LinkDTO(
-                    id: $taskLink->getId(),
-                    creationDate: $taskLink->getLinkDate(),
-                    role: $taskLink->getRole(),
-                    creatableDTO: null,
-                    user: new UserDTO($userToSearch)
-                );
-
-                $task = $taskLink->getCreatable();
-                //we create the taskDTO from the task data
-                $tasksDTO[] = new TaskDTO($task->getId(),
-                    title: $task->getTitle(),
-                    description: $task->getDescription(),
-                    links: $linksDTO,
-                    project: $task->getProject()->getId(),
-                    taskState: $task->getTaskState(),
-                    limitDate: $task->getLimitDate(),
-                    userID: null);
+                $taskArray[] = $taskLink->getCreatable();
             }
-            return $tasksDTO;
+
+            return $this->loadTaskDTOArray($taskArray);
+
         }catch (Exception $e){
             throw new Exception($e->getMessage());
         }
@@ -110,36 +92,8 @@ class TaskControllerImpl implements TaskController{
                 throw new Exception("No hay tareas para este proyecto con ID: " . $projectId);
             }
 
-            //the array we will fill with the jsons of the taskDTOs of the task we found
-            $tasksDTO = [];
+            return $this->loadTaskDTOArray($tasks);
 
-            foreach ($tasks as $task){//for each task I got
-
-                //I make the link array so the taskDTO constructor doesn't die
-                $links = $task->getLinks();
-                $linksDTO = [];
-                foreach ($links as $link){
-                    $linksDTO[] = new LinkDTO(
-                        id: $link->getId(),
-                        creationDate: $link->getLinkDate(),
-                        role: $link->getRole(),
-                        creatableDTO: null,
-                        user: new userDTO($link->getUser()));
-                }
-
-                //we create the taskDTO from the task data
-                $tasksDTO[] = new TaskDTO(
-                    id: $task->getId(),
-                    title: $task->getTitle(),
-                    description: $task->getDescription(),
-                    links: $linksDTO,
-                    project: $task->getProject()->getId(),
-                    taskState: $task->getTaskState(),
-                    limitDate: $task->getLimitDate(),
-                    userID: 0);
-
-            }
-            return $tasksDTO;
         }catch(Exception $e){
             throw new Exception($e->getMessage());
         }
@@ -160,19 +114,7 @@ class TaskControllerImpl implements TaskController{
             throw new Exception("No se pudo encontrar una tarea con ID: " . $taskId);
         }
 
-        $links = $task->getLinks();
-        $LinksDTO = [];
-
-        foreach ($links as $link) {
-
-            $LinksDTO[] = new LinkDTO(
-                id: $link->getId(),
-                creationDate: $link->getLinkDate(),
-                role: $link->getRole(),
-                creatableDTO: null,
-                user: new UserDTO($link->getUser())
-            );
-        }
+        $LinksDTO = $this->loadLinkDTOArray($task->getLinks());
 
         //we create the taskDTO from the task data
         return new TaskDTO(
@@ -407,4 +349,47 @@ class TaskControllerImpl implements TaskController{
             throw new Exception($e->getMessage());
         }
     }
+
+    // UTILS -----------------------------------------------------------------------------------------------------------
+
+    public function loadLinkDTOArray(Collection | array $links): array{
+
+        $linkDTOArray = [];
+        foreach ($links as $link) {
+            $userDTO = new UserDTO($link->getUser());
+            $userDTO->removePassword();
+            $userDTO->removeEmail();
+
+            $linkDTOArray[] = new LinkDTO(
+                id: $link->getId(),
+                creationDate: $link->getLinkDate(),
+                role: $link->getRole(),
+                creatableDTO: null,
+                user: $userDTO
+            );
+        }
+        return $linkDTOArray;
+
+    }
+
+    public function loadTaskDTOArray(array $tasks): array{
+
+        $TasksDTOArray = [];
+
+        foreach ($tasks as $task) {
+            $TasksDTOArray[] = new TaskDTO(
+                id: $task->getId(),
+                title: $task->getTitle(),
+                description: $task->getDescription(),
+                links: $this->loadLinkDTOArray($task->getLinks()),
+                project: $task->getProject() ? $task->getProject()->getId() : null,
+                taskState: $task->getTaskState(),
+                limitDate: $task->getLimitDate(),
+                userID:null
+            );
+        }
+        return $TasksDTOArray;
+    }
+
+
 }

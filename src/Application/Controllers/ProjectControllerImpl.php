@@ -14,6 +14,7 @@ use App\Interface\ProjectController;
 use App\Domain\Repositories\ProjectRepository;
 use App\Interface\Dtos\ProjectDTO;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
@@ -43,33 +44,8 @@ class ProjectControllerImpl implements ProjectController {
         }
 
         $links = $project->getLinks();
-        $linkDTOArray = [];
-
-        foreach ($links as $link) {
-
-            $linkDTOArray[] = new LinkDTO(
-                id: null,
-                creationDate: null,
-                role: $link->getRole(),
-                creatableDTO: null,
-                user: new UserDTO($link->getUser())
-            );
-        }
-
-        $TasksDTOArray = [];
-
-        foreach ($project->getTasks() as $task) {
-            $TasksDTOArray[] = new TaskDTO(
-                id: $task->getId(),
-                title: $task->getTitle(),
-                description: $task->getDescription(),
-                links: null,
-                project: null,
-                taskState: null,
-                limitDate: null,
-                userID: null
-            );
-        }
+        $linkDTOArray = $this->loadLinkDTOArray($links);
+        $TasksDTOArray = $this->loadTaskDTOArray($project->getTasks());
 
         return new ProjectDTO(
         id: $project->getId(),
@@ -206,4 +182,47 @@ class ProjectControllerImpl implements ProjectController {
             throw new Exception( "No se pudo borrar el Projecto: " . $projectId . " | " . $e->getMessage());
         }
     }
+
+    // UTILS -----------------------------------------------------------------------------------------------------------
+
+    public function loadLinkDTOArray(Collection $links): array{
+
+        $linkDTOArray = [];
+        foreach ($links as $link) {
+            $userDTO = new UserDTO($link->getUser());
+            $userDTO->removePassword();
+            $userDTO->removeEmail();
+
+            $linkDTOArray[] = new LinkDTO(
+                id: $link->getId(),
+                creationDate: null,
+                role: $link->getRole(),
+                creatableDTO: null,
+                user: $userDTO
+            );
+        }
+        return $linkDTOArray;
+
+    }
+
+    public function loadTaskDTOArray(Collection $tasks): array{
+
+        $TasksDTOArray = [];
+
+        foreach ($tasks as $task) {
+            $TasksDTOArray[] = new TaskDTO(
+                id: $task->getId(),
+                title: $task->getTitle(),
+                description: $task->getDescription(),
+                links: $this->loadLinkDTOArray($task->getLinks()),
+                project: $task->getProject() ? $task->getProject()->getId() : null,
+                taskState: $task->getTaskState(),
+                limitDate: $task->getLimitDate(),
+                userID:null
+            );
+        }
+        return $TasksDTOArray;
+    }
+
+
 }
