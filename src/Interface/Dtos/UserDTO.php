@@ -10,15 +10,15 @@ class UserDTO implements JsonSerializable
 {
     private ?int $id;
 
-    private string $name;
+    private ?string $name;
 
-    private string $lastName;
+    private ?string $lastName;
 
-    private string $email;
+    private ?string $email;
 
-    private string $password;
+    private ?string $password;
 
-    private bool $verified;
+    private ?bool $verified;
 
     /** Crea un DTO a partir la entidad <code>User</code>
      * @param User $user

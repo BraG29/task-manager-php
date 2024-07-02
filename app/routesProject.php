@@ -25,7 +25,8 @@ return function (App $app, ProjectController $projectController) {
             $data = json_decode($json, true);
 
             $projectDto = ProjectDTO::fromArray($data);
-            $projectId = $projectController->createProject($projectDto, $data['userId']);
+            $userId = $projectDto->getLinks()[0]->getUser()->getId();
+            $projectId = $projectController->createProject($projectDto, $userId);
             if ($projectId == 0) {
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
             } else {

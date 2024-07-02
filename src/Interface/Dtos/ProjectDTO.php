@@ -27,11 +27,18 @@ class ProjectDTO extends CreatableDTO{
         if ($data === null) {
             return null;
         }
+
+        $links = [];
+
+        foreach ($data['links'] as $link){
+            $links[] = LinkDTO::fromArray($link);
+        }
+
         return new ProjectDTO(
             id: $data['id'],
             title: $data['title'],
             description: $data['description'],
-            links: null,
+            links: $links,
             state: $data['state'],
             tasks: null
         );
@@ -104,8 +111,8 @@ class ProjectDTO extends CreatableDTO{
             'title' => $this->title,
             'description' => $this->description,
             'state' => $this->state,
-            'linkList' => $this->links,
-            'taskList' => $this->tasks
+            'links' => $this->links,
+            'tasks' => $this->tasks
         ];
     }
 

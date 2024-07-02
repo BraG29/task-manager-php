@@ -33,7 +33,7 @@ class LinkDTO implements JsonSerializable{
         return new LinkDTO(
             $data['id'],
             $data['creationDate'],
-            $data['role'],
+            RoleType::from($data['role']),
             $data['creatable'],
             $userDTO
         );
@@ -89,6 +89,4 @@ class LinkDTO implements JsonSerializable{
             'user' => $this->user
         ];
     }
-
-
 }

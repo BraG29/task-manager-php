@@ -100,7 +100,6 @@ public function jsonSerialize(): array{
             'limitDate' => $this->limitDate,
             'taskState' => $this->taskState,
             'userID' => $this->userID
-
         ];
 }
 
@@ -126,8 +125,6 @@ public function jsonSerialize(): array{
             $linksDTOArray = array_push($linksDTOArray, $linkDTO);//push it into the array
         }
     }
-
-
 
 
     //TODO adjust the constructor so I can create LinkDTO when getting data  from the endpoint array

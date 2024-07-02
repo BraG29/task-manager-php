@@ -17,16 +17,16 @@ class User
     private ?int $id;
 
     #[ORM\Column(type: 'string')]
-    private string $name;
+    private ?string $name;
 
     #[ORM\Column(name: "last_name", type: 'string')]
-    private string $lastName;
+    private ?string $lastName;
 
     #[ORM\Column(type: 'string', unique: true)]
-    private string $email;
+    private ?string $email;
 
     #[ORM\Column(type: 'string')]
-    private string $password;
+    private ?string $password;
 
     #[ORM\OneToMany(targetEntity: Link::class, mappedBy: 'user')]
     private Collection $links;
@@ -36,19 +36,20 @@ class User
 
     /**
      * @param int|null $id
-     * @param string $name
-     * @param string $lastName
-     * @param string $email
-     * @param string $password
+     * @param string|null $name
+     * @param string|null $lastName
+     * @param string|null $email
+     * @param string|null $password
      * @param Collection $links
+     * @param bool $verified
      */
-    public function __construct(?int   $id,
-                                string     $name,
-                                string     $lastName,
-                                string     $email,
-                                string     $password,
+    public function __construct(?int       $id,
+                                ?string    $name,
+                                ?string    $lastName,
+                                ?string    $email,
+                                ?string    $password,
                                 Collection $links,
-                                bool $verified)
+                                bool       $verified)
     {
         $this->id = $id;
         $this->name = $name;
@@ -69,42 +70,42 @@ class User
         $this->id = $id;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(?string $name): void
     {
         $this->name = $name;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    public function setLastName(string $lastName): void
+    public function setLastName(?string $lastName): void
     {
         $this->lastName = $lastName;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }
 
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): void
+    public function setPassword(?string $password): void
     {
         $this->password = $password;
     }
