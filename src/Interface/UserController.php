@@ -47,21 +47,21 @@ interface UserController
     /**
      * Función para enviar un mail a un suuario invitandolo a un proyecto..
      * @param int $senderId -> id del usuario que envia la invitacion.
-     * @param int $receiverId -> id del usuario que recive la invitacion.
+     * @param string $receiverEmail -> email del usuario que recibe la invitacion.
      * @param int $projectId -> id del projecto a invitar.
      * @param RoleType $role -> rol que se le quiere dar al usuario.
      *
      */
-    public function inviteUserToProject(int $senderId, int $receiverId, int $projectId, RoleType $role): void;
+    public function inviteUserToProject(int $senderId, string $receiverEmail, int $projectId, RoleType $role): void;
 
     /**
      * Función para vincular un usuario a un proyecto, cuando este acepta una invitacion.
      * @param int $userOwnerId -> id del usuario dueño del proyecto.
-     * @param int $userInvitedId -> id del usuario a invitar.
+     * @param string $userInvitedEmail -> email del usuario a invitar.
      * @param int $projectId -> id del proyecto a vincular.
      * @param RoleType $role -> rol que se le asignará al usuario.
      */
-    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void;
+    public function linkUserToProject(int $userOwnerId, string $userInvitedEmail, int $projectId, RoleType $role): void;
 
     /**
      * Funcíon para verificar el correo de un  usuario.

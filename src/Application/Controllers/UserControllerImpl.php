@@ -101,17 +101,17 @@ class UserControllerImpl implements UserController
         return null;
     }
 
-    public function inviteUserToProject(int $senderId, int $receiverId, int $projectId, RoleType $role): void
+    public function inviteUserToProject(int $senderId, string $receiverEmail, int $projectId, RoleType $role): void
     {
 
-        $receiver = $this->userRepository->findById($receiverId);
+        $receiver = $this->userRepository->findByEmail($receiverEmail);
         $sender = $this->userRepository->findById($senderId);
 
-        if($receiverId == null || $senderId == null){
+        if($receiverEmail == null || $senderId == null){
             throw new Exception("Ocurrio un error al buscar usuarios");
         }
 
-        if($receiverId == $senderId){
+        if($receiver->getId() == $senderId){
             throw new Exception("No puedes agregarte al proyecto.");
         }
 
@@ -121,20 +121,19 @@ class UserControllerImpl implements UserController
             throw new Exception("Proyecto no encontrado.");
         }
 
-        $r = $receiver->getEmail();
 
         $subject = "Te han invitado a un proyecto!";
 
         $queryParams = [
             'userOwnerId' => $senderId,
-            'userInvitedId' => $receiverId,
+            'invitedEmail' => $receiverEmail,
             'projectId' => $projectId,
             'role' => $role,
             'action' => 'accepted'
         ];
 
-        $invitationAccepted = "http://192.168.1.15:8080/linkUser?" . http_build_query($queryParams);
-        $invitationRejected = "http://192.168.1.15:8080/linkUser?action=rejected";
+        $invitationAccepted = "http://localhost:8080/linkUser?" . http_build_query($queryParams);
+        $invitationRejected = "http://localhost:8080/linkUser?action=rejected";
 
         $senderName = $sender->getName();
         $receiverName = $receiver->getName();
@@ -161,13 +160,13 @@ class UserControllerImpl implements UserController
             ";
 
         $sendMail = require __DIR__ . '/../../../app/sendEmail.php';
-        $sendMail($r, $subject, $message);
+        $sendMail($receiverEmail, $subject, $message);
     }
 
-    public function linkUserToProject(int $userOwnerId, int $userInvitedId, int $projectId, RoleType $role): void
+    public function linkUserToProject(int $userOwnerId, string $userInvitedEmail, int $projectId, RoleType $role): void
     {
         try{
-            $userInvited = $this->userRepository->findById($userInvitedId);
+            $userInvited = $this->userRepository->findByEmail($userInvitedEmail);
             $projectOwner = $this->userRepository->findById($userOwnerId);
 
             if($userInvited == null || $projectOwner == null){
@@ -188,7 +187,6 @@ class UserControllerImpl implements UserController
                 $project = $this->projectRepository->findById($projectId);
 
                 //con esto me aseguro que sea un proyecto.
-
                 if($project == null){
                     throw new Exception("No se encontro un proyecto con ese id.");
                 }
@@ -247,7 +245,7 @@ class UserControllerImpl implements UserController
             $subject = "Verificacion de correo";
             $userId = $user->getId();
 
-            $verificationLink = "http://192.168.1.15:8080/verifyEmail?userId=".$userId;
+            $verificationLink = "http://localhost:8080/verifyEmail?userId=".$userId;
             $htmlPage = file_get_contents(__DIR__ . '/../../../public/pages/verificationEmail.html');
             $html = str_replace(['{name}', '{verificationLink}'], [$name, $verificationLink], $htmlPage);
             $sendMail = require __DIR__ . '/../../../app/sendEmail.php';

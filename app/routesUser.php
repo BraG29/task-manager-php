@@ -101,7 +101,7 @@ return function (App $app, UserController $userController) {
 
         if($verification){
 
-            $url = "http://192.168.1.15:4200/login";
+            $url = "http://localhost:4200/login";
             $sleep = 5000;
             $htmlPage = file_get_contents(__DIR__ . '/../public/pages/loginRedirect.html');
             $html = str_replace(['{url}', '{sleep}'], [$url, $sleep], $htmlPage);
@@ -117,14 +117,14 @@ return function (App $app, UserController $userController) {
 
         $params = $request->getParsedBody();
         $projectId = $params['projectId'];
-        $userId= $params['invitedId'];
+        $userEmail= $params['invitedEmail'];
         $ownerId = $params['ownerId'];
         $role = $params['role'];
 
         try{
 
             $role = RoleType::from((int)$role);
-            $userController->inviteUserToProject($ownerId, $userId, $projectId, $role);
+            $userController->inviteUserToProject($ownerId, $userEmail, $projectId, $role);
             $response->getBody()->write(json_encode("Correo de invitacion enviado con exito"));
             return $response;
 
@@ -142,7 +142,7 @@ return function (App $app, UserController $userController) {
 
         try{
             $projectId = $params['projectId'];
-            $userId= $params['userInvitedId'];
+            $userEmail= $params['invitedEmail'];
             $ownerId = $params['userOwnerId'];
             $roleName =  isset($params['role']['value']) ? intval($params['role']['value']) : null;
             $action = $params['action'];
@@ -150,7 +150,7 @@ return function (App $app, UserController $userController) {
             $role = RoleType::from($roleName);
 
             if($action == 'accepted'){
-                $userController->linkUserToProject(intval($ownerId), intval($userId), intval($projectId), $role);
+                $userController->linkUserToProject(intval($ownerId), $userEmail, intval($projectId), $role);
                 $response->getBody()->write(json_encode(["Usuario vinculado con exito."]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
             }else{
