@@ -94,52 +94,12 @@ class ProjectControllerImpl implements ProjectController {
             throw new Exception('User not found');
         }
 
-        $linkSet = $user->getLinks();
+        $linkSet = $user->getProjects();
         $projectDTOArray = [];
 
         foreach ($linkSet as $link) {
             if($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) {
-                if ($link->getCreatable() instanceof Project) {
-
                     $projectDTOArray[] = $this->getProjectData($link->getCreatable()->getId());
-
-
-                    /*foreach ($projectLinks as $linkOfProject) {
-
-
-                        $linkDTOArray[] = new LinkDTO(
-                            id: null,
-                            creationDate: null,
-                            role: $linkOfProject->getRole(),
-                            creatableDTO: null,
-                            user: new UserDTO($linkOfProject->getUser())
-                        );
-                    }
-
-                    $TasksDTOArray = [];
-
-                    foreach ($project->getTasks() as $task) {
-                        $TasksDTOArray[] = new TaskDTO(
-                            id: $task->getId(),
-                            title: $task->getTitle(),
-                            description: $task->getDescription(),
-                            links: null,
-                            project: null,
-                            taskState: null,
-                            limitDate: null,
-                            userID: null
-                        );
-                    }
-
-                    $projectDTOArray[] = new ProjectDTO(
-                        id: $project->getId(),
-                        title: $project->getTitle(),
-                        description: $project->getDescription(),
-                        links: $linkDTOArray,
-                        state: $project->isAvailable(),
-                        tasks: $TasksDTOArray
-                    );*/
-                }
             }
         }
         return $projectDTOArray;
