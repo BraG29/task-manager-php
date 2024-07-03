@@ -101,7 +101,11 @@ return function (App $app, UserController $userController) {
 
         if($verification){
 
-            $url = "http://localhost:4200/login";
+            $config = file_get_contents(__DIR__ . "/../config.json");
+            $config = json_decode($config, true);
+            $frontUrl = $config['api']['frontUrl'];
+
+            $url = $frontUrl."/login";
             $sleep = 5000;
             $htmlPage = file_get_contents(__DIR__ . '/../public/pages/loginRedirect.html');
             $html = str_replace(['{url}', '{sleep}'], [$url, $sleep], $htmlPage);
@@ -115,7 +119,9 @@ return function (App $app, UserController $userController) {
 
     $app->post('/sendInvitation', function (Request $request, Response $response, $args) use ($userController) {
 
-        $params = $request->getParsedBody();
+        $json = $request->getBody();
+        $params = json_decode($json, true);
+
         $projectId = $params['projectId'];
         $userEmail= $params['invitedEmail'];
         $ownerId = $params['ownerId'];

@@ -1,6 +1,8 @@
 {
   "api": {
-    "JWT_SECRET": "3d0b3174b0f44cf1b9d8e9a65e8b0d"
+    "JWT_SECRET": "3d0b3174b0f44cf1b9d8e9a65e8b0d",
+    "apiUrl": "http://192.168.1.19:8080",
+    "frontUrl": "http://192.168.1.16:4200"
   }
 }
 
