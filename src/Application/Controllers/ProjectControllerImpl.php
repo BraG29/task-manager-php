@@ -130,10 +130,22 @@ class ProjectControllerImpl implements ProjectController {
                 throw new Exception('Usuario no encontrado');
             }
 
-            foreach ($project->getLinks() as $link) {
-                if(($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) && $link->getUser()->getId() === $userId) {
+            foreach ($project->getTasks() as $task) {
+                if($task->getAuthor()->getId() === $userId) {
                     continue;
                 }
+                throw new Exception('No tiene permisos para editar esta Tarea');
+            }
+
+            $flag = false;
+            foreach ($project->getLinks() as $link) {
+                if(($link->getRole() === RoleType::ADMIN || $link->getRole() === RoleType::EDITOR) && $link->getUser()->getId() === $userId) {
+                    $flag = true;
+                    break;
+                }
+            }
+
+            if($flag === false){
                 throw new Exception('No tiene permisos para editar este Projecto');
             }
 
