@@ -30,17 +30,17 @@ class ProjectDTO extends CreatableDTO{
 
         $state = null;
         if($data['state'] != null){
-            $state = data['state'];
+            $state = $data['state'];
         }
 
         $title = null;
         if($data['title'] != null){
-            $title = data['title'];
+            $title = $data['title'];
         }
 
         $description = null;
         if($data['description'] != null){
-            $description = data['description'];
+            $description = $data['description'];
         }
 
         $links = [];
