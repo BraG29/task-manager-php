@@ -132,8 +132,12 @@ class UserControllerImpl implements UserController
             'action' => 'accepted'
         ];
 
-        $invitationAccepted = "http://localhost:8080/linkUser?" . http_build_query($queryParams);
-        $invitationRejected = "http://localhost:8080/linkUser?action=rejected";
+        $config = file_get_contents(__DIR__ . "/../../../config.json");
+        $config = json_decode($config, true);
+        $apiUrl = $config['api']['apiUrl'];
+
+        $invitationAccepted = $apiUrl."/linkUser?" . http_build_query($queryParams);
+        $invitationRejected = $apiUrl."/linkUser?action=rejected";
 
         $senderName = $sender->getName();
         $receiverName = $receiver->getName();
@@ -245,7 +249,11 @@ class UserControllerImpl implements UserController
             $subject = "Verificacion de correo";
             $userId = $user->getId();
 
-            $verificationLink = "http://localhost:8080/verifyEmail?userId=".$userId;
+            $config = file_get_contents(__DIR__ . "/../../../config.json");
+            $config = json_decode($config, true);
+            $apiUrl = $config['api']['apiUrl'];
+
+            $verificationLink = $apiUrl."/verifyEmail?userId=".$userId;
             $htmlPage = file_get_contents(__DIR__ . '/../../../public/pages/verificationEmail.html');
             $html = str_replace(['{name}', '{verificationLink}'], [$name, $verificationLink], $htmlPage);
             $sendMail = require __DIR__ . '/../../../app/sendEmail.php';
