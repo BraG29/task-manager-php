@@ -5,63 +5,85 @@ namespace App\Interface;
 use App\Domain\Entities\Enums\RoleType;
 use App\Interface\Dtos\UserDTO;
 
+
 interface UserController
 {
     /**
-     * @return array
+     * Obtiene la lista de todos los usuarios del sistema.
+     * @return array -> devuelve la lista de usuarios.
      */
     public function getUsers() : array;
 
     /**
-     * @param int $id
-     * @return UserDTO|null
+     * Obtiene un usuario en particuarl.
+     * @param int $id -> identificador del usuario.
+     * @return UserDTO|null -> devuelve el usuario.
      */
     public function getUser(int $id) : ?UserDTO;
 
-    public function getUsersByProject(int $projectId);
+    /**
+     * Obtiene la lista de usuarios dentro de un proyecto.
+     * @param int $projectId -> id del proyecto a buscar.
+     * @return array|null -> devuelve la lista de usuario dentro de un proyecto.
+     */
+    public function getUsersByProject(int $projectId) : ?array;
 
     /**
      * Función para registrar un nuevo usuario en el sistema.
      * @param UserDTO $userDTO -> datos del usuario a registrar.
+     * @return int -> devuelve el id del usuario creado.
      */
-    public function registerUser(UserDTO $userDTO);
+    public function registerUser(UserDTO $userDTO): int;
 
     /**
      * Función para que un usuario inicie sesion en el sistema.
      * @param String $email -> email del usuario.
      * @param String $password -> contraseña del usuario
-     * @return mixed -> retorna una respues afirmativa en caso de encontrar los datos enviados.
+     * @return UserDTO|null -> retorna una respues afirmativa en caso de encontrar los datos enviados.
      */
-    public function signIn(String $email, String $password);
+    public function signIn(String $email, String $password): ?UserDTO;
 
 
     /**
-     * Función para invitar un usuario a un proyecto.
-     * @param UserDTO $sender -> datos del usuario que envia la invitacion.
-     * @param UserDTO $receiver -> datos del usuario que recibe la invitacion.
+     * Función para enviar un mail a un suuario invitandolo a un proyecto..
+     * @param int $senderId -> id del usuario que envia la invitacion.
+     * @param string $receiverEmail -> email del usuario que recibe la invitacion.
+     * @param int $projectId -> id del projecto a invitar.
      * @param RoleType $role -> rol que se le quiere dar al usuario.
-     * @return mixed
+     *
      */
-    public function inviteUserToProject(UserDTO $sender, UserDTO $receiver, RoleType $role);
+    public function inviteUserToProject(int $senderId, string $receiverEmail, int $projectId, RoleType $role): void;
 
     /**
-     * Función para vincular un usuario a un proyecto, cuando este acepta una  invitacion.
-     * @param int $userId -> id del usuario a vincular.
+     * Función para vincular un usuario a un proyecto, cuando este acepta una invitacion.
+     * @param int $userOwnerId -> id del usuario dueño del proyecto.
+     * @param string $userInvitedEmail -> email del usuario a invitar.
      * @param int $projectId -> id del proyecto a vincular.
-     * @return mixed
+     * @param RoleType $role -> rol que se le asignará al usuario.
      */
-    public function linkUserToProject(int $userId, int $projectId);
+    public function linkUserToProject(int $userOwnerId, string $userInvitedEmail, int $projectId, RoleType $role): void;
+
+    /**
+     * Funcíon para verificar el correo de un  usuario.
+     * @param int $userId -> identificador del usuario a validar correo.
+     * @return bool -> devuelve true si puedo validar, caso contrario devuelve false.
+     */
+    public function verifyEmail(int $userId): bool;
+
+    /**
+     * Función para cambiar el rol de un usuario en un proyecto.
+     * @param int $projectId -> identifcador del proyecto.
+     * @param RoleType $role -> rol nuevo.
+     * @param int $userId -> identificador del usuario a otorgar nuevo rol.
+     */
+    public function updateRole(int $projectId, RoleType $role, int $userId): void;
 
 
-    /*
-     * registrar(user: User)
-iniciarSesion(user: User): boolean
-getDatosUsuario(userId: long): User
-getUsuariosEnProyecto(projectId: id): Set<User>
-getDatosUsuario(): Set<User> -> no se usa a priori
-invitarAProyecto(emisor: User, receptor: Usuario, mensaje: String)
-vincularAProyecto(user: Usuario)
-asignarRol(proyectoId: long, rol: Rol, user: User)
-updateUser(user: User)
-     * */
+    /**
+     * Función para actualizar datos de un usuario.
+     * @param UserDTO $user -> dto del usuario a modificar.
+     * @return int -> id del usuario modificado.
+     */
+    public function updateUser(UserDTO $userDTO) : int;
+
 }

@@ -5,8 +5,12 @@ namespace App\Infrastructure\Persistence;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Entities\Project;
 
+use App\Interface\Dtos\ProjectDTO;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 class ProjectRepositoryImpl implements ProjectRepository{
 
@@ -24,31 +28,60 @@ class ProjectRepositoryImpl implements ProjectRepository{
     {
         $this->entityManager = $entityManager;
         $this->repository = $entityManager->getRepository(Project::class);
-
     }
 
-    public function createProject()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function createProject(Project $project): int
     {
-        // TODO: Implement createProject() method.
+        $this->entityManager->persist($project);
+        $this->entityManager->flush();
+        return $project->getId();
     }
 
-    public function editProject()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function editProject(Project $project): int
     {
-        // TODO: Implement editProject() method.
+        $this->entityManager->persist($project);
+        $this->entityManager->flush();
+        return $project->getId();
     }
 
-    public function deleteProject()
+    /**
+     * @throws Exception
+     */
+    public function deleteProject(int $projectId): void
     {
-        // TODO: Implement deleteProject() method.
+        try {
+            $project = $this->entityManager->find(Project::class, $projectId);
+            $this->entityManager->remove($project);
+            $this->entityManager->flush();
+        }
+         catch (ORMException $e) {
+            throw new Exception( $e->getMessage());
+        }
     }
 
-    public function findById()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function findById(int $id):?Project
     {
-        // TODO: Implement findById() method.
+        $project = $this->entityManager->find(Project::class, $id);
+        if (!$project) {
+            return null;
+        }
+        return $project;
     }
 
-    public function findAll()
+    public function findAll():?array
     {
-        // TODO: Implement findAll() method.
+        return $this->repository->findAll();
     }
 }

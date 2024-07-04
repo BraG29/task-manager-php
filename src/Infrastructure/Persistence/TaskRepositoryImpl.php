@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use App\Interface\Dtos\TaskDTO;
+use Exception;
 
 class TaskRepositoryImpl implements TaskRepository{
     private EntityManager $entityManager;
@@ -29,19 +30,43 @@ class TaskRepositoryImpl implements TaskRepository{
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function createTask(Task $task){
+    public function addTask(Task $task): ?int
+    {
         $this->entityManager->persist($task);
         $this->entityManager->flush();
+        return $task->getId();
     }
 
-    public function updateTask(Task $task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function updateTask(Task $task): ?int
     {
-        // TODO: Implement updateTask() method.
+        try {
+            $this->entityManager->persist($task);
+            $this->entityManager->flush();
+            return $task->getId();
+        }
+        catch (Exception $e) {
+            throw new Exception("Error al actualizar la tarea con ID: ".$task->getId());
+        }
     }
 
-    public function deleteTask(Task $task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function deleteTask(Task $task): void
     {
-        // TODO: Implement deleteTask() method.
+        try {
+            $this->entityManager->remove($task);
+            $this->entityManager->flush();
+        }catch(Exception $e){
+            throw new Exception("Error al borrar la tarea con ID: ".$task->getId());
+        }
     }
 
 
@@ -49,15 +74,15 @@ class TaskRepositoryImpl implements TaskRepository{
      * <p>Finds a task given the ID</p>
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws Exception
      */
     public function findById(int $id): ?Task
     {
-        return $this->entityManager->find(Task::class, $id);
+            return $this->entityManager->find(Task::class, $id);
     }
 
 
-    public function findAll(): array
-    {
+    public function findAll(): array{
         return $this->repository->findAll();
     }
 
@@ -66,4 +91,5 @@ class TaskRepositoryImpl implements TaskRepository{
         //$users = $em->getRepository('MyProject\Domain\User')->findBy(array('age' => 20));
         return $this->repository->findBy(array('project' => $projectId));
     }
+
 }

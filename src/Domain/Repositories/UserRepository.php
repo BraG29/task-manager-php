@@ -3,6 +3,9 @@
 namespace App\Domain\Repositories;
 
 use App\Domain\Entities\User;
+use App\Domain\Entities\Project;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 interface UserRepository
 {
@@ -16,5 +19,15 @@ interface UserRepository
      * @return User[]
      */
     public function findAll(): array;
+
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function save(User $user): void;
+
+    public function findByEmail(String $email): ?User;
+
 
 }

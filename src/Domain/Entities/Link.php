@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * <p>
- *    <b>Entidad que representa el vinculo entre creador y creable</b>
+ *    <b>Entidad que representa el vinculo entre usuario y creable</b>
  * </p>
  * <p>
  *  Tipo de vinculos:
@@ -36,9 +36,9 @@ class Link
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
-    private int $id;
-    #[ORM\Column(type: 'datetime_immutable')]
-    private DateTimeImmutable $creationDate;
+    private ?int $id;
+    #[ORM\Column(name: 'link_date', type: 'datetime_immutable')]
+    private DateTimeImmutable $linkDate;
     #[ORM\Column(enumType: RoleType::class)]
     private RoleType $role;
     #[ORM\ManyToOne(targetEntity: Creatable::class, inversedBy: 'links')]
@@ -47,43 +47,43 @@ class Link
     private User $user;
 
     /**
-     * @param int $id
+     * @param int|null $id
      * @param DateTimeImmutable $creationDate
      * @param RoleType $role
      * @param Creatable $creatable
      * @param User $user
      */
-    public function __construct(int               $id,
+    public function __construct(?int               $id,
                                 DateTimeImmutable $creationDate,
                                 RoleType          $role,
                                 Creatable         $creatable,
                                 User              $user)
     {
         $this->id = $id;
-        $this->creationDate = $creationDate;
+        $this->linkDate = $creationDate;
         $this->role = $role;
         $this->creatable = $creatable;
         $this->user = $user;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId(?int $id): void
     {
         $this->id = $id;
     }
 
-    public function getCreationDate(): DateTimeImmutable
+    public function getLinkDate(): DateTimeImmutable
     {
-        return $this->creationDate;
+        return $this->linkDate;
     }
 
-    public function setCreationDate(DateTimeImmutable $creationDate): void
+    public function setLinkDate(DateTimeImmutable $linkDate): void
     {
-        $this->creationDate = $creationDate;
+        $this->linkDate = $linkDate;
     }
 
     public function getRole(): RoleType
@@ -115,4 +115,5 @@ class Link
     {
         $this->user = $user;
     }
+
 }

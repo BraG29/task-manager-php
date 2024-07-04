@@ -6,7 +6,7 @@ use App\Interface\Dtos\TaskDTO;
 
 interface TaskRepository{
 
-    public function createTask(Task $task);
+    public function addTask(Task $task): ?int;
 
     public function updateTask(Task $task);
 
